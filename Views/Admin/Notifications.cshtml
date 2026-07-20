@@ -1,0 +1,121 @@
+@model List<NehasBeed.Models.AdminNotification>
+@{
+    ViewData["Title"] = "Notifications";
+    ViewData["PageTitle"] = "Notifications";
+}
+
+@if (TempData["Success"] != null)
+{
+  <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);border-radius:10px;padding:14px 20px;margin-bottom:20px;font-size:0.88rem;color:#1e8449;display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-circle-check"></i> @TempData["Success"]
+  </div>
+}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:16px;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;font-weight:400;font-style:italic;">Notifications</h1>
+    <p style="font-size:0.82rem;color:var(--mid);margin-top:4px;">Publish announcements that appear on the website every 10 minutes</p>
+  </div>
+</div>
+
+@* ── Create New Notification ── *@
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow-sm);margin-bottom:28px;">
+  <h2 style="font-family:var(--font-btn);font-size:0.72rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:20px;color:var(--ink);">
+    <i class="fa-solid fa-plus" style="margin-right:6px;"></i> Publish New Notification
+  </h2>
+  <form method="post" action="/Admin/CreateNotification">
+    @Html.AntiForgeryToken()
+    <div style="display:grid;grid-template-columns:1.5fr 1fr auto auto;gap:12px;align-items:end;">
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Message *</label>
+        <input type="text" name="message" class="form-control" placeholder="e.g. 🎉 New Arrivals this week! Check out our latest collection..." required maxlength="500">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Image URL (Optional)</label>
+        <input type="text" name="imageUrl" class="form-control" placeholder="e.g. images/bag-1.png">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label class="form-label">Type</label>
+        <select name="type" class="form-control" style="min-width:120px;">
+          <option value="info">ℹ️ Info</option>
+          <option value="success">✅ Success</option>
+          <option value="warning">⚠️ Warning</option>
+        </select>
+      </div>
+      <button type="submit" style="padding:11px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--r-md);font-size:0.84rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;white-space:nowrap;">
+        <i class="fa-solid fa-paper-plane"></i> Publish
+      </button>
+    </div>
+  </form>
+</div>
+
+@* ── Notifications List ── *@
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        @foreach (var h in new[] { "Message", "Image", "Type", "Status", "Created", "Actions" })
+        {
+          <th style="padding:14px 20px;font-size:0.67rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);background:#f9f8f5;border-bottom:1px solid var(--border);text-align:left;">@h</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (!Model.Any())
+      {
+        <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--mid);">No notifications yet. Publish one above!</td></tr>
+      }
+      @foreach (var n in Model)
+      {
+        var typeColor = n.Type == "warning" ? "#d68910" : n.Type == "success" ? "#27ae60" : "#3498db";
+        var typeBg    = n.Type == "warning" ? "rgba(243,156,18,0.1)" : n.Type == "success" ? "rgba(39,174,96,0.1)" : "rgba(52,152,219,0.1)";
+        <tr>
+          <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;font-size:0.85rem;max-width:350px;">@n.Message</td>
+          <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;">
+            @if (!string.IsNullOrEmpty(n.ImageUrl))
+            {
+              <img src="/@n.ImageUrl" style="width:36px;height:44px;object-fit:cover;border-radius:4px;border:1px solid var(--border);" />
+            }
+            else
+            {
+              <span style="font-size:0.75rem;color:var(--mid);font-style:italic;">None</span>
+            }
+          </td>
+          <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;">
+            <span style="padding:4px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;background:@typeBg;color:@typeColor;text-transform:uppercase;letter-spacing:0.05em;">@n.Type</span>
+          </td>
+          <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;">
+            @if (n.IsActive)
+            {
+              <span style="padding:4px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;background:rgba(39,174,96,0.1);color:#27ae60;">● Active</span>
+            }
+            else
+            {
+              <span style="padding:4px 10px;border-radius:99px;font-size:0.68rem;font-weight:600;background:rgba(150,150,150,0.1);color:#888;">○ Hidden</span>
+            }
+          </td>
+          <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;font-size:0.8rem;color:var(--mid);">@n.CreatedAt.ToLocalTime().ToString("dd MMM, HH:mm")</td>
+          <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;">
+            <div style="display:flex;gap:8px;">
+              <form method="post" action="/Admin/ToggleNotification" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@n.Id">
+                <button type="submit" style="padding:5px 12px;border:1px solid var(--border);border-radius:7px;font-size:0.72rem;cursor:pointer;background:transparent;color:var(--ink);display:inline-flex;align-items:center;gap:4px;">
+                  <i class="fa-solid @(n.IsActive ? "fa-eye-slash" : "fa-eye")"></i>
+                  @(n.IsActive ? "Hide" : "Show")
+                </button>
+              </form>
+              <form method="post" action="/Admin/DeleteNotification" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@n.Id">
+                <button type="submit" onclick="return confirm('Delete this notification?')" style="padding:5px 12px;border:1px solid rgba(192,57,43,0.3);border-radius:7px;font-size:0.72rem;cursor:pointer;background:rgba(192,57,43,0.07);color:var(--error);display:inline-flex;align-items:center;gap:4px;">
+                  <i class="fa-solid fa-trash"></i> Delete
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,174 @@
+@model NehasBeed.Models.Order
+@{
+    ViewData["Title"] = "Invoice " + Model.InvoiceNumber;
+    Layout = null; // standalone printable page
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice @Model.InvoiceNumber – NEHAS BEED</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f7f6f2; color: #111; padding: 40px 20px; }
+    .invoice-container { max-width: 760px; margin: 0 auto; }
+    .invoice { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .invoice-header { background: linear-gradient(135deg, #0a0a0a 0%, #1a1025 100%); padding: 40px 48px; display: flex; justify-content: space-between; align-items: flex-start; }
+    .brand { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 400; color: #fff; letter-spacing: 0.05em; }
+    .brand span { display: block; font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: #c9a96e; margin-top: 4px; font-family: 'Inter', sans-serif; font-weight: 500; }
+    .invoice-meta { text-align: right; color: rgba(255,255,255,0.6); font-size: 0.82rem; }
+    .invoice-meta .inv-num { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: #c9a96e; font-weight: 400; margin-bottom: 6px; }
+    .invoice-body { padding: 40px 48px; }
+    .invoice-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 36px; }
+    .party-label { font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: #888; font-weight: 600; margin-bottom: 10px; }
+    .party-name { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+    .party-detail { font-size: 0.82rem; color: #555; line-height: 1.7; }
+    .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+    thead tr { border-bottom: 2px solid #e8e5e0; }
+    th { padding: 10px 0; font-size: 0.67rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #888; text-align: left; }
+    th:last-child, td:last-child { text-align: right; }
+    td { padding: 16px 0; border-bottom: 1px solid #f0ede8; font-size: 0.88rem; vertical-align: middle; }
+    .product-thumb { width: 46px; height: 56px; object-fit: cover; border-radius: 6px; border: 1px solid #e8e5e0; }
+    .summary-table { width: 320px; margin-left: auto; }
+    .summary-table tr td { border: none; padding: 6px 0; font-size: 0.88rem; }
+    .summary-table tr td:last-child { text-align: right; font-weight: 500; }
+    .total-row td { font-size: 1.05rem; font-weight: 700; border-top: 2px solid #111; padding-top: 12px; }
+    .invoice-footer { background: #f9f8f5; border-top: 1px solid #e8e5e0; padding: 24px 48px; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: #888; }
+    .download-btn { display: inline-flex; align-items: center; gap: 8px; background: #111; color: #fff; padding: 12px 24px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.85rem; font-family: 'Inter', sans-serif; font-weight: 500; transition: background 0.2s; }
+    .download-btn:hover { background: #222; }
+    .btn-wrap { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+  </style>
+  <!-- Load html2pdf from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="invoice-container">
+  <div class="btn-wrap">
+    <button class="download-btn" id="download-pdf-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Invoice
+    </button>
+  </div>
+
+  <div class="invoice" id="invoice-card">
+    @* Header *@
+    <div class="invoice-header">
+      <div class="brand">NEHAS BEED <span>Handcrafted Luxury</span></div>
+      <div class="invoice-meta">
+        <div class="inv-num">@Model.InvoiceNumber</div>
+        <div>Date: @Model.CreatedAt.ToString("dd MMMM yyyy")</div>
+        <div style="margin-top:10px;">
+          @{
+            var sc = Model.GetStatusBadgeColor();
+            var sb = Model.GetStatusBg();
+          }
+          <span class="status-pill" style="color:@sc;background:@sb;">
+            <span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+            @Model.Status
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="invoice-body">
+      @* Parties *@
+      <div class="invoice-parties">
+        <div>
+          <div class="party-label">Billed To</div>
+          <div class="party-name">@Model.CustomerName</div>
+          <div class="party-detail">
+            @Model.CustomerEmail<br>
+            @Model.CustomerPhone<br>
+            @Model.ShippingAddress<br>
+            @Model.City, @Model.Postcode<br>
+            @Model.Country
+          </div>
+        </div>
+        <div>
+          <div class="party-label">From</div>
+          <div class="party-name">NEHAS BEED</div>
+          <div class="party-detail">
+            support@nehasbeed.com<br>
+            London, United Kingdom<br>
+            Payment: @Model.PaymentMethod
+          </div>
+        </div>
+      </div>
+
+      @* Items Table *@
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px;">Image</th>
+            <th>Product</th>
+            <th>Style</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var item in Model.OrderItems)
+          {
+            <tr>
+              <td><img src="@Url.Content("~/" + item.ProductImage)" class="product-thumb"></td>
+              <td style="font-weight:500;">@item.ProductName</td>
+              <td style="color:#888;font-size:0.82rem;">@(item.SelectedColor ?? "—")</td>
+              <td>@item.Quantity</td>
+              <td>£@item.UnitPrice.ToString("N2")</td>
+              <td style="font-weight:600;">£@((item.UnitPrice * item.Quantity).ToString("N2"))</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @* Summary *@
+      <table class="summary-table">
+        <tr>
+          <td style="color:#888;">Subtotal</td>
+          <td>£@Model.Subtotal.ToString("N2")</td>
+        </tr>
+        <tr>
+          <td style="color:#888;">Shipping</td>
+          <td>@(Model.ShippingCost == 0 ? "Free" : "£" + Model.ShippingCost.ToString("N2"))</td>
+        </tr>
+        <tr class="total-row">
+          <td>Total</td>
+          <td>£@Model.TotalAmount.ToString("N2")</td>
+        </tr>
+      </table>
+
+      @* Thank You *@
+      <div style="margin-top:32px;padding:20px 24px;background:#f9f8f5;border-radius:12px;border-left:3px solid #c9a96e;">
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;color:#111;margin-bottom:6px;">Thank you for your order!</p>
+        <p style="font-size:0.82rem;color:#888;">Each piece is handcrafted with love. If you have any questions, contact us at support@nehasbeed.com</p>
+      </div>
+    </div>
+
+    @* Footer *@
+    <div class="invoice-footer">
+      <span>© @DateTime.Now.Year NEHAS BEED · All rights reserved</span>
+      <span style="font-style:italic;font-family:'Cormorant Garamond',serif;font-size:0.95rem;">Handcrafted Luxury</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('download-pdf-btn').addEventListener('click', function () {
+    const element = document.getElementById('invoice-card');
+    const opt = {
+      margin:       0.3,
+      filename:     'Invoice-@Model.InvoiceNumber' + '.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  });
+</script>
+
+</body>
+</html>

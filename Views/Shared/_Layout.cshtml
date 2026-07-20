@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>@ViewData["Title"] – NEHAS BEED | Handcrafted Luxury Accessories</title>
+  <meta name="description" content="@(ViewData["MetaDescription"] ?? "Discover NEHAS BEED – handcrafted beaded bags, chains, necklaces and accessories. Each piece is a unique work of art made by skilled artisans.")">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&family=Outfit:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+  @await RenderSectionAsync("ExtraCss", required: false)
+</head>
+<body>
+
+  @await Html.PartialAsync("_Navbar")
+
+  <main>
+    @RenderBody()
+  </main>
+
+  @* Custom Premium Toast Alert Container *@
+  <div id="toast-container"></div>
+
+  @* Site Notification Popup — appears every 10 minutes from bottom-left *@
+  <div id="site-notification-popup">
+    <img id="snp-image" src="" style="width: 50px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); display: none; flex-shrink: 0;" />
+    <i class="fa-solid fa-bell snp-icon" id="snp-bell-icon"></i>
+    <div class="snp-body">
+      <div class="snp-label" id="snp-title-label">From the Store</div>
+      <div class="snp-msg" id="snp-message"></div>
+    </div>
+    <button class="snp-close" onclick="dismissSiteNotification()" title="Close">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  @await Html.PartialAsync("_Footer")
+
+  <script src="~/js/products.js" asp-append-version="true"></script>
+  @await RenderSectionAsync("ExtraJs", required: false)
+
+  <script>
+    // Global Authentication Flag
+    const IS_AUTHENTICATED = @(User.Identity != null && User.Identity.IsAuthenticated ? "true" : "false");
+    const IS_ADMIN = @(User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin") ? "true" : "false");
+
+    // Client-side Custom Toast Alerts
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      
+      const icon = type === 'success' ? '<i class="fa-solid fa-circle-check" style="color:var(--success);font-size:1.15rem;"></i>' 
+                 : type === 'error' ? '<i class="fa-solid fa-circle-xmark" style="color:var(--error);font-size:1.15rem;"></i>'
+                 : '<i class="fa-solid fa-circle-info" style="color:var(--gold);font-size:1.15rem;"></i>';
+
+      toast.innerHTML = `
+        ${icon}
+        <div style="flex:1;line-height:1.4;">${message}</div>
+        <button onclick="this.parentElement.classList.remove('show'); setTimeout(()=>this.parentElement.remove(), 400);" style="background:none;border:none;color:var(--mid);cursor:pointer;font-size:1rem;margin-left:8px;"><i class="fa-solid fa-xmark"></i></button>
+      `;
+
+      container.appendChild(toast);
+
+      // Trigger transition
+      setTimeout(() => {
+        toast.classList.add('show');
+      }, 50);
+
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.classList.remove('show');
+          setTimeout(() => toast.remove(), 400);
+        }
+      }, 5000);
+    }
+
+    // Client-side Cart operations
+    function getCart() {
+      try {
+        return JSON.parse(localStorage.getItem('cart') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+    }
+
+    function addToCart(id, name, price, image, qty = 1, color = 'Standard') {
+      if (IS_ADMIN) {
+        showToast("Admins cannot purchase products or add items to the cart.", "error");
+        return;
+      }
+      if (!IS_AUTHENTICATED) {
+        showToast("Please Login first to add products to your cart.", "error");
+        setTimeout(() => {
+          window.location.href = "/Account/Login";
+        }, 1200);
+        return;
+      }
+      
+      let cart = getCart();
+      let existingIndex = cart.findIndex(item => item.id === id && item.color === color);
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += qty;
+      } else {
+        cart.push({ id, name, price, image, qty, color });
+      }
+      saveCart(cart);
+      
+      // Visual notification
+      const badge = document.getElementById('global-cart-badge');
+      if (badge) {
+        badge.classList.add('animate-scale');
+        setTimeout(() => badge.classList.remove('animate-scale'), 300);
+      }
+      
+      // Premium toast instead of native confirm popup
+      showToast(`"${name}" added to your bag! <a href="/Home/Cart" style="color:var(--taupe);text-decoration:underline;margin-left:8px;font-weight:600;text-transform:uppercase;font-size:0.75rem;">View Bag →</a>`, 'success');
+    }
+
+    function addToCartDirect(id, name, price, image) {
+      addToCart(id, name, price, image, 1, 'Standard');
+    }
+
+    function updateCartBadge() {
+      const badge = document.getElementById('global-cart-badge');
+      if (badge) {
+        let cart = getCart();
+        let totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+        badge.textContent = totalCount;
+      }
+    }
+
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('site-header');
+      if (header) header.classList.toggle('scrolled', window.scrollY > 30);
+    });
+
+    // Mobile nav
+    const menuToggle  = document.getElementById('menu-toggle');
+    const mobileNav   = document.getElementById('mobile-nav');
+    const navOverlay  = document.getElementById('nav-overlay');
+    const mobileClose = document.getElementById('mobile-close');
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown= document.getElementById('user-dropdown');
+
+    if (menuToggle)  menuToggle.addEventListener('click',  () => mobileNav.classList.add('open'));
+    if (navOverlay)  navOverlay.addEventListener('click',  () => mobileNav.classList.remove('open'));
+    if (mobileClose) mobileClose.addEventListener('click', () => mobileNav.classList.remove('open'));
+    if (userMenuBtn) userMenuBtn.addEventListener('click',  (e) => { e.stopPropagation(); userDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => { if (userDropdown) userDropdown.classList.remove('open'); });
+
+    // Search is handled by performSearch() in _Navbar.cshtml (Enter key + button click)
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Update cart badge on load
+    document.addEventListener("DOMContentLoaded", updateCartBadge);
+
+    // ── Site Notification Popup System ──
+    let snpDismissedIds = JSON.parse(sessionStorage.getItem('snp_dismissed') || '[]');
+    let snpCurrentId = null;
+    let snpIndex = 0;
+
+    function dismissSiteNotification() {
+      const popup = document.getElementById('site-notification-popup');
+      popup.classList.remove('visible');
+      if (snpCurrentId !== null) {
+        snpDismissedIds.push(snpCurrentId);
+        sessionStorage.setItem('snp_dismissed', JSON.stringify(snpDismissedIds));
+      }
+    }
+
+    async function showSiteNotification() {
+      try {
+        const res = await fetch('/Admin/ActiveNotifications');
+        if (!res.ok) return;
+        const notifications = await res.json();
+        if (notifications.length === 0) return;
+
+        // Filter out dismissed notifications
+        const activeNotifs = notifications.filter(n => !snpDismissedIds.includes(n.id));
+        if (activeNotifs.length === 0) return;
+
+        // Cycle through active notifications
+        const pick = activeNotifs[snpIndex % activeNotifs.length];
+        snpIndex++;
+
+        snpCurrentId = pick.id;
+        const msgEl = document.getElementById('snp-message');
+        if (msgEl) msgEl.textContent = pick.message;
+
+        const imgEl = document.getElementById('snp-image');
+        const bellEl = document.getElementById('snp-bell-icon');
+        const titleEl = document.getElementById('snp-title-label');
+
+        if (pick.imageUrl) {
+          if (imgEl) {
+            imgEl.src = '/' + pick.imageUrl;
+            imgEl.style.display = 'block';
+          }
+          if (bellEl) bellEl.style.display = 'none';
+        } else {
+          if (imgEl) imgEl.style.display = 'none';
+          if (bellEl) {
+            bellEl.style.display = 'block';
+            bellEl.style.color = pick.type === 'warning' ? '#d68910' : pick.type === 'success' ? '#27ae60' : 'var(--gold)';
+          }
+        }
+
+        if (titleEl) {
+          if (pick.id < 0) {
+            titleEl.textContent = "New Arrival ✦";
+            titleEl.style.color = "var(--gold)";
+          } else if (pick.type === 'warning') {
+            titleEl.textContent = "Notice ⚠️";
+            titleEl.style.color = "#d68910";
+          } else {
+            titleEl.textContent = "Announcement ✦";
+            titleEl.style.color = "var(--gold)";
+          }
+        }
+
+        const popup = document.getElementById('site-notification-popup');
+        popup.classList.add('visible');
+
+        // Auto-hide after 12 seconds
+        setTimeout(() => {
+          popup.classList.remove('visible');
+        }, 12000);
+      } catch (e) { /* silently ignore network errors */ }
+    }
+
+    // Show on page load after 3s delay, then every 10 minutes
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(showSiteNotification, 3000);
+      setInterval(showSiteNotification, 10 * 60 * 1000);
+    });
+  </script>
+</body>
+</html>

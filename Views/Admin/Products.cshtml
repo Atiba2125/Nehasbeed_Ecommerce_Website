@@ -1,0 +1,120 @@
+@model List<NehasBeed.Models.Product>
+@{
+    ViewData["Title"] = "Products";
+    ViewData["PageTitle"] = "Products";
+    string search = ViewBag.Search ?? "";
+}
+
+@if (TempData["Success"] != null)
+{
+  <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);border-radius:10px;padding:14px 20px;margin-bottom:20px;font-size:0.88rem;color:#1e8449;display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-circle-check"></i> @TempData["Success"]
+  </div>
+}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;font-weight:400;font-style:italic;">Products</h1>
+    <p style="font-size:0.82rem;color:var(--mid);margin-top:4px;">@ViewBag.TotalProducts total products</p>
+  </div>
+  <a href="/Admin/CreateProduct" style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#fff;font-size:0.82rem;font-weight:500;padding:10px 22px;border-radius:var(--r-md);text-decoration:none;transition:opacity 0.18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+    <i class="fa-solid fa-plus"></i> Add Product
+  </a>
+</div>
+
+
+
+@* Products Table *@
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        @foreach (var h in new[] { "Product", "Category", "Price", "Rating", "Status", "Actions" })
+        {
+          <th style="padding:14px 20px;font-size:0.67rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);background:#f9f8f5;border-bottom:1px solid var(--border);text-align:left;">@h</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (Model != null && Model.Count > 0)
+      {
+        @foreach (var product in Model)
+        {
+          <tr onmouseover="this.querySelectorAll('td').forEach(t=>t.style.background='#fcfbf8')" onmouseout="this.querySelectorAll('td').forEach(t=>t.style.background='')">
+            <td style="padding:16px 20px;border-bottom:1px solid #f0ede8;">
+              <div style="display:flex;align-items:center;gap:14px;">
+                <img src="~/@product.Image" style="width:48px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+                <div>
+                  <div style="font-size:0.88rem;font-weight:500;">@product.Name</div>
+                  @if (!string.IsNullOrEmpty(product.Badge))
+                  {
+                    <span style="font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;background:rgba(201,169,110,0.15);color:#b8935a;padding:2px 8px;border-radius:99px;">@product.Badge</span>
+                  }
+                </div>
+              </div>
+            </td>
+            <td style="padding:16px 20px;border-bottom:1px solid #f0ede8;font-size:0.85rem;text-transform:capitalize;">@product.Category</td>
+            <td style="padding:16px 20px;border-bottom:1px solid #f0ede8;font-size:0.88rem;">
+              <span style="font-weight:600;">£@product.Price.ToString("N2")</span>
+              @if (product.OriginalPrice.HasValue)
+              {
+                <span style="font-size:0.75rem;color:var(--mid);text-decoration:line-through;margin-left:6px;">£@product.OriginalPrice.Value.ToString("N2")</span>
+              }
+            </td>
+            <td style="padding:16px 20px;border-bottom:1px solid #f0ede8;font-size:0.85rem;">
+              <span style="color:#c9a96e;">★</span> @product.Rating (@product.Reviews)
+            </td>
+            <td style="padding:16px 20px;border-bottom:1px solid #f0ede8;">
+              @if (product.InStock)
+              {
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:var(--success);background:rgba(39,174,96,0.1);">
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span> In Stock
+                </span>
+              }
+              else
+              {
+                <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:var(--error);background:rgba(192,57,43,0.1);">
+                  <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span> Out of Stock
+                </span>
+              }
+            </td>
+            <td style="padding:16px 20px;border-bottom:1px solid #f0ede8;">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <a href="/Admin/ProductDetails/@product.Id" title="Info" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.75rem;color:#3498db;background:rgba(52,152,219,0.07);text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                  <i class="fa-solid fa-circle-info"></i> Info
+                </a>
+                <a href="/Admin/EditProduct/@product.Id" title="Edit" style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.75rem;color:var(--gold);background:rgba(201,169,110,0.07);text-decoration:none;display:inline-flex;align-items:center;gap:5px;">
+                  <i class="fa-regular fa-pen-to-square"></i> Edit
+                </a>
+                <form method="post" action="/Admin/DeleteProduct/@product.Id" style="display:inline;" onsubmit="return confirm('Delete \'@product.Name\'?')">
+                  @Html.AntiForgeryToken()
+                  <button type="submit" style="padding:6px 12px;border:1px solid rgba(192,57,43,0.3);border-radius:8px;font-size:0.75rem;color:var(--error);background:rgba(192,57,43,0.07);cursor:pointer;display:inline-flex;align-items:center;gap:5px;">
+                    <i class="fa-regular fa-trash-can"></i> Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        }
+      }
+      else
+      {
+        <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--mid);">No products found.</td></tr>
+      }
+    </tbody>
+  </table>
+
+  @* Pagination *@
+  @if ((int)ViewBag.TotalPages > 1)
+  {
+    <div style="padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;">
+      @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+      {
+        <a href="/Admin/Products?page=@i&search=@search"
+           style="padding:7px 13px;border-radius:8px;font-size:0.82rem;font-weight:@((int)ViewBag.CurrentPage==i?"600":"400");border:1px solid @((int)ViewBag.CurrentPage==i?"var(--ink)":"var(--border)");background:@((int)ViewBag.CurrentPage==i?"var(--ink)":"transparent");color:@((int)ViewBag.CurrentPage==i?"#fff":"var(--ink)");text-decoration:none;">
+          @i
+        </a>
+      }
+    </div>
+  }
+</div>

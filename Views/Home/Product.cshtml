@@ -1,0 +1,226 @@
+@model NehasBeed.Models.Product
+@{
+    ViewData["Title"] = (Model?.Name ?? "Product") + " – NEHAS BEED";
+    var related = ViewBag.Related as List<NehasBeed.Models.Product> ?? new List<NehasBeed.Models.Product>();
+    var colors = Model?.GetColors() ?? Array.Empty<string>();
+    var images = Model?.GetImages() ?? Array.Empty<string>();
+}
+
+@section ExtraCss {
+<style>
+  .product-layout { display:grid; grid-template-columns:1fr 1fr; gap:64px; padding:56px 0; align-items:start; }
+  .product-gallery { position:sticky; top:calc(var(--header-h)+24px); }
+  .product-main-img { width:100%; aspect-ratio:3/4; object-fit:cover; border-radius:var(--r-lg); border:1px solid var(--border); background:var(--bg-alt); }
+  .product-thumbs { display:flex; gap:10px; margin-top:14px; }
+  .product-thumb { width:70px; aspect-ratio:1; object-fit:cover; border-radius:var(--r-sm); border:2px solid transparent; cursor:pointer; transition:border-color 0.18s; }
+  .product-thumb.active { border-color:var(--taupe); }
+  .product-info { display:flex; flex-direction:column; gap:24px; }
+  .product-category-tag { font-family:var(--font-btn); font-size:0.68rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--taupe); }
+  .product-name { font-family:var(--font-heading); font-size:clamp(2rem,4vw,3rem); font-weight:400; line-height:1.15; }
+  .product-rating-row { display:flex; align-items:center; gap:12px; }
+  .product-price-row { display:flex; align-items:center; gap:16px; }
+  .product-price-main { font-family:var(--font-heading); font-size:2rem; font-weight:400; }
+  .product-price-original { font-size:1.1rem; color:var(--mid); text-decoration:line-through; }
+  .product-divider { height:1px; background:var(--border); }
+  .color-options { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+  .color-btn { padding:8px 18px; border:1.5px solid var(--border); border-radius:var(--r-sm); font-size:0.82rem; cursor:pointer; transition:all 0.18s; background:var(--white); }
+  .color-btn.active, .color-btn:hover { border-color:var(--taupe); background:var(--taupe); color:var(--white); }
+  .qty-selector { display:flex; align-items:center; border:1px solid var(--border); border-radius:var(--r-sm); width:fit-content; }
+  .qty-btn { padding:10px 16px; font-size:1rem; }
+  .qty-input { width:50px; text-align:center; border:none; background:none; font-size:0.95rem; font-family:var(--font-body); outline:none; }
+  .product-actions { display:flex; gap:12px; }
+  .product-desc { font-size:0.9rem; color:var(--mid); line-height:1.85; }
+  .product-meta-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .product-meta-item { background:var(--bg-alt); border-radius:var(--r-sm); padding:14px 18px; font-size:0.82rem; }
+  .product-meta-label { font-family:var(--font-btn); font-size:0.65rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--mid); margin-bottom:4px; }
+  @@media(max-width:900px){ .product-layout{grid-template-columns:1fr;} .product-gallery{position:static;} }
+</style>
+}
+
+<div class="container">
+  <div class="breadcrumb" style="padding:20px 0;">
+    <a href="/">Home</a><span>/</span>
+    <a href="/Home/Shop">Shop</a><span>/</span>
+    <span>@Model?.Name</span>
+  </div>
+  <div class="product-layout">
+    @* Gallery *@
+    <div class="product-gallery">
+      <img src="~/@Model?.Image" alt="@Model?.Name" class="product-main-img" id="main-img">
+      @if (images.Length > 0)
+      {
+        <div class="product-thumbs">
+          @for (int i = 0; i < images.Length; i++)
+          {
+            <img src="~/@images[i]" class="product-thumb @(i == 0 ? "active" : "")" onclick="switchImg(this, '@images[i]')" alt="@Model?.Name">
+          }
+        </div>
+      }
+    </div>
+
+    @* Info *@
+    <div class="product-info">
+      <div>
+        <div class="product-category-tag">@Model?.Category</div>
+        @if (Model?.Badge != null)
+        {
+          <span class="product-card-badge @Model.Badge.ToLower().Replace(" ", "-")" style="margin-left:12px;">@Model.Badge</span>
+        }
+      </div>
+      <h1 class="product-name">@Model?.Name</h1>
+      <div class="product-rating-row">
+        <span class="stars" style="color:#c9a96e;">@Model?.GetStars()</span>
+        <span style="font-size:0.85rem;font-weight:600;">@Model?.Rating</span>
+        <span style="color:var(--mid);font-size:0.82rem;">(@Model?.Reviews reviews)</span>
+      </div>
+      <div class="product-price-row">
+        <span class="product-price-main">£@Model?.Price.ToString("F2")</span>
+        @if (Model?.OriginalPrice.HasValue == true)
+        {
+          <span class="product-price-original">£@Model.OriginalPrice.Value.ToString("F2")</span>
+          <span style="background:rgba(201,169,110,0.15);color:#b8935a;font-size:0.72rem;font-weight:600;padding:3px 10px;border-radius:99px;">
+            Save £@((Model.OriginalPrice.Value - Model.Price).ToString("F2"))
+          </span>
+        }
+      </div>
+      @{
+        bool pdSoldOut = Model == null || Model.StockQuantity <= 0;
+        bool pdLowStock = !pdSoldOut && Model!.StockQuantity <= 5;
+      }
+      @if (pdSoldOut)
+      {
+        <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:#c0392b;background:rgba(192,57,43,0.08);padding:6px 14px;border-radius:99px;border:1px solid rgba(192,57,43,0.2);">
+          <i class="fa-solid fa-circle-xmark"></i> Out of Stock
+        </div>
+      }
+      else if (pdLowStock)
+      {
+        <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:#d68910;background:rgba(214,137,16,0.08);padding:6px 14px;border-radius:99px;border:1px solid rgba(214,137,16,0.2);">
+          <i class="fa-solid fa-fire-flame-curved"></i> Only @Model!.StockQuantity left in stock — order soon!
+        </div>
+      }
+      else
+      {
+        <div style="display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:500;color:#27ae60;background:rgba(39,174,96,0.07);padding:6px 14px;border-radius:99px;border:1px solid rgba(39,174,96,0.2);">
+          <i class="fa-solid fa-circle-check"></i> @Model!.StockQuantity available in stock
+        </div>
+      }
+      <div class="product-divider"></div>
+      <p class="product-desc">@Model?.Description</p>
+
+      @* Colors *@
+      @if (colors.Length > 0)
+      {
+        <div>
+          <div style="font-family:var(--font-btn);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);margin-bottom:10px;">Select Style</div>
+          <div class="color-options">
+            @for (int i = 0; i < colors.Length; i++)
+            {
+              <button class="color-btn @(i == 0 ? "active" : "")" onclick="selectColor(this)">@colors[i]</button>
+            }
+          </div>
+        </div>
+      }
+
+      @* Quantity & Cart *@
+      <div>
+        <div style="font-family:var(--font-btn);font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);margin-bottom:10px;">Quantity</div>
+        <div class="product-actions">
+          <div class="qty-selector">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <input type="number" class="qty-input" id="qty" value="1" min="1" max="@(Model?.StockQuantity > 0 ? Model.StockQuantity : 1)">
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+          @if (pdSoldOut)
+          {
+            <div style="flex:1;">
+              <div class="btn-sold-out" style="padding:14px;">
+                <i class="fa-solid fa-ban"></i> Sold Out
+              </div>
+              <p style="font-size:0.75rem;color:var(--mid);margin-top:8px;text-align:center;">
+                <i class="fa-solid fa-rotate" style="margin-right:4px;"></i>
+                This product is sold out. Restock coming soon!
+              </p>
+            </div>
+          }
+          else
+          {
+            <button type="button" class="btn btn-primary" style="flex:1;border:none;cursor:pointer;" onclick="handleAddToBag()">
+              <i class="fa-solid fa-bag-shopping"></i> Add to Bag
+            </button>
+          }
+          <button class="btn btn-secondary" onclick="toggleWish(this)" title="Wishlist">
+            <i class="fa-regular fa-heart"></i>
+          </button>
+        </div>
+      </div>
+      <div class="product-divider"></div>
+      <div class="product-meta-row">
+        <div class="product-meta-item"><div class="product-meta-label">Handmade</div>40+ Hours Craftsmanship</div>
+        <div class="product-meta-item"><div class="product-meta-label">Shipping</div>Free over £150</div>
+        <div class="product-meta-item"><div class="product-meta-label">Returns</div>30-Day Free Returns</div>
+        <div class="product-meta-item"><div class="product-meta-label">Materials</div>Miyuki Seed Beads</div>
+      </div>
+    </div>
+  </div>
+
+  @* Related Products *@
+  @if (related.Count > 0)
+  {
+    <section style="padding: 56px 0;">
+      <p class="section-eyebrow">You May Also Like</p>
+      <h2 class="section-title" style="margin-bottom:32px;">Related Pieces</h2>
+      <div class="products-grid">
+        @foreach (var rel in related)
+        {
+          <article class="product-card reveal">
+            <div class="product-card-img-wrap">
+              <img src="~/@rel.Image" alt="@rel.Name" class="product-card-img" loading="lazy">
+              @if (rel.Badge != null)
+              {
+                <span class="product-card-badge">@rel.Badge</span>
+              }
+              <button type="button" class="product-card-quick-add" style="border:none;cursor:pointer;width:100%;text-align:center;" onclick="event.preventDefault(); addToCartDirect(@rel.Id, '@Html.Raw(rel.Name.Replace("'", "\\'"))', @rel.Price, '@rel.Image')">Add to Cart</button>
+            </div>
+            <div class="product-card-info">
+              <span class="product-card-category">@rel.Category</span>
+              <a href="/Home/Product/@rel.Id" class="product-card-name">@rel.Name</a>
+              <div class="product-card-price">
+                <span class="price-current">£@rel.Price.ToString("F2")</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</div>
+
+@section ExtraJs {
+<script>
+  function switchImg(thumb, src) {
+    document.getElementById('main-img').src = src;
+    document.querySelectorAll('.product-thumb').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+  }
+  function changeQty(dir) {
+    const inp = document.getElementById('qty');
+    const v = parseInt(inp.value) + dir;
+    if (v >= 1 && v <= 10) inp.value = v;
+  }
+  function handleAddToBag() {
+    const qty = parseInt(document.getElementById('qty').value) || 1;
+    const activeColorBtn = document.querySelector('.color-btn.active');
+    const color = activeColorBtn ? activeColorBtn.textContent.trim() : 'Standard';
+    addToCart(@(Model?.Id ?? 0), '@Html.Raw(Model?.Name?.Replace("'", "\\'") ?? "")', @(Model?.Price ?? 0), '@(Model?.Image ?? "")', qty, color);
+  }
+  function selectColor(btn) {
+    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function toggleWish(btn) {
+    btn.classList.toggle('wishlisted');
+    btn.innerHTML = btn.classList.contains('wishlisted') ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
+  }
+</script>
+}

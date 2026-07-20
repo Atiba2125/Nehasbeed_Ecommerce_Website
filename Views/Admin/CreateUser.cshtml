@@ -1,0 +1,53 @@
+@model NehasBeed.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Add User";
+    ViewData["PageTitle"] = "Add User";
+}
+
+<div style="max-width:600px;">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
+    <a href="/Admin/Users" style="width:38px;height:38px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;font-size:0.9rem;">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;font-weight:400;font-style:italic;">Add New User</h1>
+  </div>
+
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:36px;box-shadow:var(--shadow-sm);">
+    @if (!ViewData.ModelState.IsValid)
+    {
+      <div style="background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:20px;font-size:0.85rem;color:var(--error);">
+        <div asp-validation-summary="All"></div>
+      </div>
+    }
+
+    <form method="post" action="/Admin/CreateUser">
+      @Html.AntiForgeryToken()
+      
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="fullName" class="form-control" placeholder="Sophia Loren" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Email Address *</label>
+        <input type="email" name="email" class="form-control" placeholder="sophia@example.com" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label">Password *</label>
+        <input type="password" name="password" class="form-control" placeholder="Min 6 characters" required>
+      </div>
+
+
+
+      <div style="display:flex;gap:12px;">
+        <button type="submit" style="display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;font-size:0.85rem;font-weight:500;padding:11px 28px;border-radius:var(--r-md);border:none;cursor:pointer;">
+          <i class="fa-solid fa-user-plus"></i> Create User
+        </button>
+        <a href="/Admin/Users" style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--ink);font-size:0.85rem;padding:11px 20px;border-radius:var(--r-md);border:1px solid var(--border);text-decoration:none;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "FAQs – NEHAS BEED";
+    ViewData["MetaDescription"] = "Frequently asked questions about our handcrafted seed bead bags, shipping, care guides, and custom boutique accessories.";
+}
+
+@section ExtraCss {
+<style>
+  .faq-section { padding: 40px 0 80px; max-width: 800px; margin: 0 auto; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+  }
+  .faq-question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--ink);
+    user-select: none;
+  }
+  .faq-question h3 {
+    font-size: inherit;
+    font-weight: 500;
+  }
+  .faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    color: var(--mid);
+    font-size: 0.92rem;
+    line-height: 1.8;
+  }
+  .faq-answer p {
+    padding-top: 14px;
+    margin-bottom: 0;
+  }
+  .faq-icon {
+    font-size: 0.9rem;
+    color: var(--mid);
+    transition: transform 0.3s;
+  }
+  .faq-item.active .faq-answer {
+    max-height: 200px;
+    transition: max-height 0.3s ease-in;
+  }
+  .faq-item.active .faq-icon {
+    transform: rotate(180deg);
+    color: var(--taupe);
+  }
+</style>
+}
+
+<div class="page-header">
+  <div class="container" style="text-align:center;">
+    <div class="breadcrumb" style="justify-content:center">
+      <a href="/">Home</a><span>/</span><span>FAQs</span>
+    </div>
+    <h1 class="section-title animate-fade-up">Frequently Asked Questions</h1>
+    <p style="color:var(--mid);margin-top:8px;">Everything you need to know about our luxury artisan pieces</p>
+  </div>
+</div>
+
+<div class="container">
+  <div class="faq-section">
+    
+    <div class="faq-item reveal">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h3>How long does it take to make one handbag?</h3>
+        <span class="faq-icon"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          Each of our beaded handbags takes between 40 and 120 hours of pure hands-on crafting time. This includes selecting the premium Japanese Miyuki beads, setting the patterns, weaving, sewing the lining, and mounting custom hardware.
+        </p>
+      </div>
+    </div>
+    
+    <div class="faq-item reveal">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h3>Can I order a custom color or size?</h3>
+        <span class="faq-icon"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          Yes, absolutely! We love creating bespoke pieces tailored to your style or special events. Please contact us via our Contact Us page, detailing the style and color palette you would like, and our atelier designers will get back to you with custom sketches and pricing.
+        </p>
+      </div>
+    </div>
+
+    <div class="faq-item reveal">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h3>What is your shipping policy?</h3>
+        <span class="faq-icon"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          We offer complimentary worldwide express shipping on all orders over £150. For orders under £150, a standard shipping fee of £12.00 is applied. All packages are insured and shipped with tracking information.
+        </p>
+      </div>
+    </div>
+
+    <div class="faq-item reveal">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h3>How should I care for my beaded accessory?</h3>
+        <span class="faq-icon"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          To maintain the pristine quality of your seed-beaded piece, store it in its original luxury dust bag when not in use. Avoid direct exposure to perfume, cosmetics, or intense heat. If it becomes dusty, gently wipe it with a soft, dry microfibre cloth.
+        </p>
+      </div>
+    </div>
+
+    <div class="faq-item reveal">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h3>Are the Miyuki seed beads durable?</h3>
+        <span class="faq-icon"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="faq-answer">
+        <p>
+          Yes! Japanese Miyuki seed beads are world-renowned for their durability, uniform size, and intense, fade-resistant color coatings. We use heavy-duty, double-braided nylon threads to guarantee that your bag remains solid and structured for generations.
+        </p>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+@section ExtraJs {
+<script>
+  function toggleFaq(questionEl) {
+    const item = questionEl.parentElement;
+    item.classList.toggle('active');
+  }
+</script>
+}

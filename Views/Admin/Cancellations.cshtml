@@ -1,0 +1,56 @@
+@model List<NehasBeed.Models.Order>
+@{
+    ViewData["Title"] = "Cancellations";
+    ViewData["PageTitle"] = "Cancellations";
+    string search = ViewBag.Search ?? "";
+}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;font-weight:400;font-style:italic;">Order Cancellations</h1>
+    <p style="font-size:0.82rem;color:var(--mid);margin-top:4px;">@Model.Count user-cancelled orders</p>
+  </div>
+</div>
+
+@* Cancellations Table *@
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        @foreach (var h in new[] { "Invoice", "Customer", "Date Ordered", "Date Cancelled", "Amount Refunded", "Status" })
+        {
+          <th style="padding:14px 20px;font-size:0.67rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);background:#f9f8f5;border-bottom:1px solid var(--border);text-align:left;">@h</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (Model.Count == 0)
+      {
+        <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--mid);">No cancellations found.</td></tr>
+      }
+      @foreach (var order in Model)
+      {
+        <tr onmouseover="this.querySelectorAll('td').forEach(t=>t.style.background='#fcfbf8')" onmouseout="this.querySelectorAll('td').forEach(t=>t.style.background='')">
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.82rem;font-weight:600;color:var(--taupe);">@order.InvoiceNumber</td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.85rem;">
+            <div style="font-weight:500;">@order.CustomerName</div>
+            <div style="font-size:0.72rem;color:var(--mid);">@order.CustomerEmail</div>
+          </td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.82rem;color:var(--mid);">
+            @order.CreatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+          </td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.82rem;color:#c0392b;font-weight:500;">
+            @order.UpdatedAt.ToLocalTime().ToString("dd MMM yyyy, HH:mm")
+          </td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.88rem;font-weight:600;">£@order.TotalAmount.ToString("N2")</td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:#7f8c8d;background:rgba(127,140,141,0.12);">
+              <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+              User Cancelled
+            </span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

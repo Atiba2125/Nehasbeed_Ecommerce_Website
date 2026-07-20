@@ -1,0 +1,85 @@
+@model List<NehasBeed.Models.Product>
+@{
+    ViewData["Title"] = "New Arrivals – NEHAS BEED";
+    ViewData["MetaDescription"] = "Discover our latest collection of handcrafted beaded bags, accessories, suncatchers, necklaces, and jewelry.";
+}
+
+<div class="page-header">
+  <div class="container" style="text-align:center;">
+    <div class="breadcrumb" style="justify-content:center">
+      <a href="/">Home</a><span>/</span><span>New Arrivals</span>
+    </div>
+    <h1 class="section-title animate-fade-up">New Arrivals</h1>
+    <p style="color:var(--mid);margin-top:8px;">Freshly completed luxury pieces added to the store</p>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom: 80px;">
+  <div class="products-grid" id="new-arrivals-grid">
+    @foreach (var product in Model)
+    {
+      bool isSoldOut = product.StockQuantity <= 0;
+      bool isLowStock = !isSoldOut && product.StockQuantity <= 5;
+      <article class="product-card" data-id="@product.Id">
+        <div class="product-card-img-wrap">
+          <img src="~/@product.Image" alt="@product.Name" class="product-card-img @(isSoldOut ? "sold-out-img" : "")" loading="lazy">
+          @if (isSoldOut)
+          {
+            <span class="sold-out-badge">Sold Out</span>
+          }
+          else
+          {
+            <span class="product-card-badge new">New</span>
+          }
+          <div class="product-card-actions">
+            <button class="product-action-btn" onclick="toggleWish(this)" title="Wishlist">
+              <i class="fa-regular fa-heart"></i>
+            </button>
+            <a href="/Home/Product/@product.Id" class="product-action-btn" title="View Product">
+              <i class="fa-regular fa-eye"></i>
+            </a>
+          </div>
+          @if (isSoldOut)
+          {
+            <div class="product-card-quick-add btn-sold-out" style="cursor:not-allowed;opacity:0.75;">
+              <i class="fa-solid fa-ban" style="font-size:0.8rem;"></i> Sold Out
+            </div>
+          }
+          else
+          {
+            <button type="button" class="product-card-quick-add" style="border:none;cursor:pointer;width:100%;text-align:center;" onclick="event.preventDefault(); addToCartDirect(@product.Id, '@Html.Raw(product.Name.Replace("'", "\\'"))', @product.Price, '@product.Image')">Add to Cart</button>
+          }
+        </div>
+        <div class="product-card-info">
+          <span class="product-card-category">@product.Category</span>
+          <a href="/Home/Product/@product.Id" class="product-card-name">@product.Name</a>
+          <div class="product-card-rating">
+            <span class="stars">@product.GetStars()</span>
+            <span class="review-count">(@product.Reviews)</span>
+          </div>
+          <div class="product-card-price">
+            <span class="price-current">£@product.Price.ToString("F2")</span>
+          </div>
+          @if (isSoldOut)
+          {
+            <div style="font-size:0.7rem;color:#c0392b;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px;">
+              <i class="fa-solid fa-circle-xmark"></i> Out of Stock
+            </div>
+          }
+          else if (isLowStock)
+          {
+            <div style="font-size:0.7rem;color:#d68910;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:4px;">
+              <i class="fa-solid fa-fire-flame-curved"></i> Only @product.StockQuantity left!
+            </div>
+          }
+          else
+          {
+            <div style="font-size:0.7rem;color:#27ae60;margin-top:4px;display:flex;align-items:center;gap:4px;">
+              <i class="fa-solid fa-circle-check"></i> @product.StockQuantity in stock
+            </div>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</div>

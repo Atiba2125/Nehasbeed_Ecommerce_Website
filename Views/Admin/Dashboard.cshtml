@@ -1,0 +1,128 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageTitle"] = "Dashboard";
+    dynamic stats = ViewBag.Stats;
+    var recentOrders = (List<NehasBeed.Models.Order>)(stats.RecentOrders);
+    var topProducts  = (List<NehasBeed.Models.Product>)(stats.TopProducts);
+}
+
+@if (TempData["Success"] != null)
+{
+  <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);border-radius:10px;padding:14px 20px;margin-bottom:20px;font-size:0.88rem;color:#1e8449;display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-circle-check"></i> @TempData["Success"]
+  </div>
+}
+
+@* Welcome Banner *@
+<div style="background:linear-gradient(120deg,#0a0a0a 0%,#1a1025 50%,#0f1a2e 100%);border-radius:var(--r-xl);padding:36px 40px;margin-bottom:28px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+  <div style="position:absolute;top:-50%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(201,169,110,0.1) 0%,transparent 70%);pointer-events:none;"></div>
+  <div style="position:relative;z-index:1;">
+    <div style="font-size:0.72rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:500;">
+      Good @(DateTime.Now.Hour < 12 ? "Morning" : (DateTime.Now.Hour < 18 ? "Afternoon" : "Evening"))
+    </div>
+    <div style="font-family:var(--font-heading);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:400;color:#fff;font-style:italic;">
+      Welcome Back, Admin
+    </div>
+    <div style="font-size:0.82rem;color:rgba(255,255,255,0.45);margin-top:8px;">
+      @DateTime.Now.ToString("dddd, MMMM d, yyyy") &nbsp;·&nbsp; Here's what's happening today
+    </div>
+  </div>
+  <div style="position:relative;z-index:1;display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);padding:18px 24px;text-align:center;">
+      <div style="font-family:var(--font-heading);font-size:1.8rem;font-weight:300;color:#fff;line-height:1;">@stats.PendingOrders</div>
+      <div style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:6px;">Pending Orders</div>
+    </div>
+    <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:var(--r-lg);padding:18px 24px;text-align:center;">
+      <div style="font-family:var(--font-heading);font-size:1.8rem;font-weight:300;color:#fff;line-height:1;">@stats.LowStock</div>
+      <div style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-top:6px;">Low Stock</div>
+    </div>
+  </div>
+</div>
+
+@* Stat Cards *@
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+  @{
+    var cards = new[]
+    {
+      new { Label="Total Revenue",   Value="£" + ((decimal)stats.TotalRevenue).ToString("N2"), Trend="+12.5%", Icon="fa-sterling-sign", Bg="rgba(201,169,110,0.12)", IC="#c9a96e" },
+      new { Label="Total Orders",    Value=((int)stats.TotalOrders).ToString(),                Trend="+8.2%",  Icon="fa-receipt",       Bg="rgba(123,94,167,0.12)",  IC="#7b5ea7" },
+      new { Label="Total Products",  Value=((int)stats.TotalProducts).ToString(),              Trend="",       Icon="fa-bag-shopping",  Bg="rgba(39,174,96,0.12)",   IC="#27ae60" },
+      new { Label="Total Customers", Value=((int)stats.TotalCustomers).ToString(),             Trend="",       Icon="fa-users",         Bg="rgba(52,152,219,0.12)",  IC="#3498db" },
+    };
+  }
+  @foreach (var card in cards)
+  {
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 24px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:14px;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0,0,0,0.08)'" onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow-sm)'">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;background:@card.Bg;color:@card.IC;">
+          <i class="fa-solid @card.Icon"></i>
+        </div>
+        @if (!string.IsNullOrEmpty(card.Trend))
+        {
+          <span style="font-size:0.7rem;font-weight:500;padding:3px 8px;border-radius:99px;background:rgba(39,174,96,0.1);color:var(--success);">@card.Trend</span>
+        }
+      </div>
+      <div>
+        <div style="font-family:var(--font-heading);font-size:2.2rem;font-weight:400;color:var(--ink);line-height:1;">@card.Value</div>
+        <div style="font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--mid);margin-top:4px;">@card.Label</div>
+      </div>
+    </div>
+  }
+</div>
+
+@* Bottom Grid *@
+<div style="display:grid;grid-template-columns:1.8fr 1fr;gap:20px;">
+  @* Recent Orders *@
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:var(--font-heading);font-size:1.25rem;font-weight:400;">Recent Orders</div>
+      <a href="/Admin/Orders" style="font-size:0.75rem;font-weight:500;color:var(--taupe);">View All <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr>
+          @foreach (var h in new[] { "Order", "Customer", "Amount", "Status" })
+          {
+            <th style="padding:12px 20px;font-size:0.67rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);background:#f9f8f5;border-bottom:1px solid var(--border);text-align:left;">@h</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var order in recentOrders)
+        {
+          <tr onmouseover="this.querySelectorAll('td').forEach(t=>t.style.background='#fcfbf8')" onmouseout="this.querySelectorAll('td').forEach(t=>t.style.background='')">
+            <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;font-size:0.78rem;font-weight:600;color:var(--taupe);">@order.InvoiceNumber</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;font-size:0.855rem;">@order.CustomerName</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;font-size:0.855rem;font-weight:600;">£@order.TotalAmount.ToString("N2")</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #f0ede8;">
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:@order.GetStatusBadgeColor();background:@order.GetStatusBg();">
+                <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span>@order.Status
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @* Top Products *@
+  <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-family:var(--font-heading);font-size:1.25rem;font-weight:400;">Top Products</div>
+      <a href="/Admin/Products" style="font-size:0.75rem;font-weight:500;color:var(--taupe);">View All <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    <div style="padding:8px 0;">
+      @foreach (var p in topProducts)
+      {
+        <div style="display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid #f5f4f0;">
+          <img src="~/@p.Image" style="width:42px;height:52px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@p.Name</div>
+            <div style="font-size:0.72rem;color:var(--mid);">@p.Reviews sold · ★@p.Rating</div>
+          </div>
+          <div style="font-size:0.88rem;font-weight:600;color:var(--taupe);">£@p.Price.ToString("N2")</div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

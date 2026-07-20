@@ -1,0 +1,243 @@
+@{
+    ViewData["Title"] = "Order Placed – NEHAS BEED";
+}
+
+@section ExtraCss {
+<style>
+  /* ── Full-screen celebration overlay ── */
+  .success-overlay {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #1a1612 0%, #2c2318 50%, #1a1612 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.7s ease;
+  }
+  .success-overlay.fade-out { opacity: 0; pointer-events: none; }
+
+  /* ── Confetti particles ── */
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confettiFall var(--dur, 3s) var(--delay, 0s) ease-in forwards;
+    opacity: 0;
+  }
+  @@keyframes confettiFall {
+    0%   { transform: translateY(-60px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Checkmark circle ── */
+  .check-circle {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #857870, #c9a96e);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 16px rgba(133,120,112,0.12), 0 0 0 32px rgba(133,120,112,0.06);
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+  }
+  @@keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── Check SVG path draw ── */
+  .check-path {
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
+    animation: drawCheck 0.5s ease 0.9s forwards;
+  }
+  @@keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ── Title & text fade-up ── */
+  .success-title {
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-style: italic;
+    font-weight: 400;
+    margin: 28px 0 12px;
+    text-align: center;
+    animation: fadeUp 0.6s ease 1s both;
+  }
+  .success-subtitle {
+    color: rgba(255,255,255,0.65);
+    font-size: 1rem;
+    max-width: 500px;
+    text-align: center;
+    line-height: 1.7;
+    animation: fadeUp 0.6s ease 1.15s both;
+  }
+  @@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Invoice card ── */
+  .invoice-card {
+    margin: 28px auto 0;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 24px 40px;
+    text-align: center;
+    animation: fadeUp 0.6s ease 1.3s both;
+  }
+  .invoice-label {
+    font-family: var(--font-btn);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 6px;
+  }
+  .invoice-number {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 500;
+    color: #c9a96e;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Action buttons ── */
+  .success-actions {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 36px;
+    animation: fadeUp 0.6s ease 1.5s both;
+  }
+  .btn-success-primary {
+    background: linear-gradient(135deg, #857870, #c9a96e);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 50px;
+    font-family: var(--font-btn);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 20px rgba(201,169,110,0.35);
+  }
+  .btn-success-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,169,110,0.45); }
+  .btn-success-secondary {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.8);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 14px 32px;
+    border-radius: 50px;
+    font-family: var(--font-btn);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-success-secondary:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+  /* ── Sparkles ── */
+  .sparkle {
+    position: absolute;
+    animation: twinkle var(--dur, 2s) var(--delay, 0s) ease-in-out infinite alternate;
+    font-size: var(--size, 1rem);
+    opacity: 0;
+    color: #c9a96e;
+    pointer-events: none;
+  }
+  @@keyframes twinkle {
+    0%  { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+    50% { opacity: 0.9; transform: scale(1.2) rotate(10deg); }
+    100%{ opacity: 0.3; transform: scale(0.8) rotate(5deg); }
+  }
+</style>
+}
+
+@* ────────── SUCCESS OVERLAY ────────── *@
+<div class="success-overlay" id="success-overlay">
+
+  @* Confetti *@
+  <div id="confetti-container" style="position:absolute;inset:0;overflow:hidden;pointer-events:none;"></div>
+
+  @* Sparkles *@
+  <span class="sparkle" style="top:18%;left:12%;--dur:2.3s;--delay:0.5s;--size:1.4rem;">✦</span>
+  <span class="sparkle" style="top:25%;right:15%;--dur:1.8s;--delay:0.8s;--size:1rem;">✦</span>
+  <span class="sparkle" style="bottom:30%;left:20%;--dur:2.6s;--delay:0.3s;--size:0.9rem;">✦</span>
+  <span class="sparkle" style="bottom:22%;right:12%;--dur:2s;--delay:1s;--size:1.2rem;">✦</span>
+  <span class="sparkle" style="top:40%;left:8%;--dur:1.5s;--delay:1.2s;--size:0.7rem;">✦</span>
+
+  @* Checkmark *@
+  <div class="check-circle">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+      <path class="check-path" d="M14 27L22 35L38 17" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <h1 class="success-title">Thank You for Your Order!</h1>
+
+  <p class="success-subtitle">
+    Your handcrafted luxury pieces are being prepared with the utmost care.
+    A confirmation has been sent to your email. ✦
+  </p>
+
+  <div class="invoice-card">
+    <div class="invoice-label">Your Order Reference</div>
+    <div class="invoice-number">@ViewBag.InvoiceNumber</div>
+  </div>
+
+  <div class="success-actions">
+    <a href="/Home/Shop" class="btn-success-primary">
+      <i class="fa-solid fa-bag-shopping"></i> Continue Shopping
+    </a>
+    <a href="/" class="btn-success-secondary">
+      <i class="fa-solid fa-house"></i> Back to Home
+    </a>
+  </div>
+
+</div>
+
+@section ExtraJs {
+<script>
+  // Clear cart immediately
+  localStorage.removeItem('cart');
+  if (typeof updateCartBadge === 'function') updateCartBadge();
+
+  // ── Generate confetti ──
+  function launchConfetti() {
+    const colors = ['#c9a96e','#857870','#e8d5b7','#d4a96a','#fff','#f0e6d3','#4a9063','#5dade2'];
+    const container = document.getElementById('confetti-container');
+    for (let i = 0; i < 90; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.cssText = `
+        left: ${Math.random() * 100}%;
+        top: 0;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        width: ${5 + Math.random() * 8}px;
+        height: ${5 + Math.random() * 8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        --dur: ${2 + Math.random() * 3}s;
+        --delay: ${Math.random() * 1.8}s;
+      `;
+      container.appendChild(piece);
+    }
+  }
+
+  // Kick off confetti after checkmark animation
+  setTimeout(launchConfetti, 900);
+</script>
+}

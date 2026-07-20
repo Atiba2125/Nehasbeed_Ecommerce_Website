@@ -1,0 +1,96 @@
+@model NehasBeed.Models.Product
+@{
+    ViewData["Title"] = "Product Info";
+    ViewData["PageTitle"] = "Product Info";
+    var colors = Model.GetColors();
+    var images = Model.GetImages();
+}
+
+<div style="max-width:800px;">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;">
+    <a href="/Admin/Products" style="width:38px;height:38px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--ink);text-decoration:none;">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;font-weight:400;font-style:italic;">@Model.Name</h1>
+    @if (!string.IsNullOrEmpty(Model.Badge))
+    {
+      <span style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;background:rgba(201,169,110,0.15);color:#b8935a;padding:4px 12px;border-radius:99px;">@Model.Badge</span>
+    }
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:28px;">
+    @* Image *@
+    <div>
+      <img src="~/@Model.Image" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:var(--r-lg);border:1px solid var(--border);">
+      @if (images.Length > 1)
+      {
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          @foreach (var img in images)
+          {
+            <img src="~/@img" style="width:60px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+          }
+        </div>
+      }
+    </div>
+
+    @* Details *@
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;">
+      <div style="display:grid;gap:16px;">
+        @{
+          var rows = new[] {
+            new { L = "Product ID",      V = Model.Id.ToString() },
+            new { L = "Category",        V = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Model.Category) },
+            new { L = "Price",           V = "£" + Model.Price.ToString("N2") },
+            new { L = "Original Price",  V = Model.OriginalPrice.HasValue ? "£" + Model.OriginalPrice.Value.ToString("N2") : "—" },
+            new { L = "Rating",          V = $"★ {Model.Rating} / 5.0" },
+            new { L = "Reviews",         V = Model.Reviews.ToString() },
+            new { L = "Created At",      V = Model.CreatedAt.ToString("dd MMM yyyy") },
+            new { L = "Last Updated",    V = Model.UpdatedAt.ToString("dd MMM yyyy") },
+          };
+        }
+        @foreach (var row in rows)
+        {
+          <div style="display:flex;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid #f0ede8;font-size:0.88rem;">
+            <span style="color:var(--mid);">@row.L</span>
+            <span style="font-weight:500;">@row.V</span>
+          </div>
+        }
+        <div style="display:flex;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid #f0ede8;font-size:0.88rem;">
+          <span style="color:var(--mid);">In Stock</span>
+          <span style="font-weight:600;color:@(Model.InStock ? "var(--success)" : "var(--error)");">
+            @(Model.InStock ? "Yes" : "No")
+          </span>
+        </div>
+        @if (colors.Length > 0)
+        {
+          <div style="font-size:0.88rem;">
+            <div style="color:var(--mid);margin-bottom:8px;">Available Colors</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              @foreach (var c in colors)
+              {
+                <span style="padding:4px 12px;border:1px solid var(--border);border-radius:99px;font-size:0.78rem;">@c</span>
+              }
+            </div>
+          </div>
+        }
+        <div style="font-size:0.88rem;">
+          <div style="color:var(--mid);margin-bottom:6px;">Description</div>
+          <p style="line-height:1.7;color:var(--ink-soft);">@Model.Description</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @* Action Buttons *@
+  <div style="display:flex;gap:12px;margin-top:24px;">
+    <a href="/Admin/EditProduct/@Model.Id" style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#fff;font-size:0.85rem;font-weight:500;padding:11px 24px;border-radius:var(--r-md);text-decoration:none;">
+      <i class="fa-regular fa-pen-to-square"></i> Edit Product
+    </a>
+    <form method="post" action="/Admin/DeleteProduct/@Model.Id" onsubmit="return confirm('Delete this product?')">
+      @Html.AntiForgeryToken()
+      <button type="submit" style="display:inline-flex;align-items:center;gap:8px;background:rgba(192,57,43,0.08);color:var(--error);border:1px solid rgba(192,57,43,0.25);font-size:0.85rem;font-weight:500;padding:11px 24px;border-radius:var(--r-md);cursor:pointer;">
+        <i class="fa-regular fa-trash-can"></i> Delete Product
+      </button>
+    </form>
+  </div>
+</div>

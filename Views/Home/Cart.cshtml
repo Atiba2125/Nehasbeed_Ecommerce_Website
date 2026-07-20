@@ -1,0 +1,211 @@
+@{
+    ViewData["Title"] = "Shopping Cart – NEHAS BEED";
+}
+
+@section ExtraCss {
+<style>
+  .cart-layout { display:grid; grid-template-columns:1.8fr 1fr; gap:40px; padding:48px 0; align-items:start; }
+  .cart-table { width:100%; border-collapse:collapse; }
+  .cart-table th { padding:12px 16px; font-family:var(--font-btn); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--mid); border-bottom:1px solid var(--border); text-align:left; }
+  .cart-table td { padding:24px 16px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .cart-item-detail { display:flex; gap:20px; align-items:center; }
+  .cart-item-img { width:90px; aspect-ratio:3/4; object-fit:cover; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--bg-dark); }
+  .cart-item-name { font-family:var(--font-heading); font-size:1.2rem; font-weight:400; margin-bottom:4px; text-decoration:none; color:var(--ink); display:block; }
+  .cart-item-name:hover { color:var(--taupe); }
+  .cart-item-meta { font-size:0.78rem; color:var(--mid); }
+  .cart-qty-selector { display:flex; align-items:center; border:1px solid var(--border); border-radius:var(--r-sm); width:fit-content; background:var(--white); }
+  .cart-qty-btn { padding:8px 12px; font-size:0.85rem; border:none; background:none; cursor:pointer; color:var(--ink); display:flex; align-items:center; justify-content:center; }
+  .cart-qty-btn:hover { color:var(--taupe); }
+  .cart-qty-input { width:35px; text-align:center; border:none; background:none; font-size:0.85rem; outline:none; color:var(--ink); font-weight:500; }
+  .cart-remove-btn { color:var(--mid); transition:color var(--fast); font-size:0.95rem; background:none; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .cart-remove-btn:hover { color:var(--error); }
+  .summary-card { background:var(--white); border-radius:var(--r-lg); border:1px solid var(--border); padding:32px; box-shadow:var(--shadow-sm); }
+  .summary-title { font-family:var(--font-btn); font-size:0.75rem; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:24px; }
+  .summary-row { display:flex; justify-content:space-between; margin-bottom:18px; font-size:0.9rem; }
+  .summary-total { font-size:1.15rem; font-weight:500; border-top:1px solid var(--border); padding-top:18px; margin-top:10px; }
+  .promo-input-group { display:flex; gap:10px; margin-top:24px; border-top:1px solid var(--border); padding-top:24px; }
+  @@media(max-width:900px){ .cart-layout { grid-template-columns:1fr; } }
+</style>
+}
+
+<div class="container">
+  <h1 class="section-title animate-fade-up" style="margin-top:50px;">Shopping Bag</h1>
+
+  @* Empty Cart Message *@
+  <div id="empty-cart-msg" style="display:none; text-align:center; padding:100px 20px;">
+    <div style="font-size:3.5rem;color:var(--mid);margin-bottom:24px;"><i class="fa-solid fa-bag-shopping"></i></div>
+    <h2 style="font-family:var(--font-heading);font-weight:400;font-size:2rem;margin-bottom:12px;color:var(--ink);">Your bag is empty</h2>
+    <p style="color:var(--mid);margin-bottom:32px;font-size:0.92rem;letter-spacing:0.02em;">Add beautiful handcrafted beaded pieces to your cart to checkout.</p>
+    <a href="/Home/Shop" class="btn btn-primary" style="display:inline-block;padding:12px 36px;text-transform:uppercase;font-size:0.78rem;letter-spacing:0.1em;font-family:var(--font-btn);">Explore Collection</a>
+  </div>
+
+  @* Dynamic Cart Layout *@
+  <div class="cart-layout" id="cart-layout-container" style="display:none;">
+    @* Items Table *@
+    <div style="overflow-x:auto;">
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th><th>Quantity</th><th class="text-right">Total</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @* Dynamically filled by JS *@
+        </tbody>
+      </table>
+    </div>
+
+    @* Summary Panel *@
+    <div class="summary-card">
+      <h3 class="summary-title">Order Summary</h3>
+      <div class="summary-row"><span class="text-mid" style="color:var(--mid)">Subtotal</span><span id="subtotal-val">£0.00</span></div>
+      <div class="summary-row"><span class="text-mid" style="color:var(--mid)">Shipping</span><span id="shipping-val">£0.00</span></div>
+      <div class="summary-row" id="discount-row" style="display:none; color:var(--success);">
+        <span id="discount-label">Promo Discount</span>
+        <span id="discount-amount">-£0.00</span>
+      </div>
+      <div class="summary-row summary-total">
+        <span>Estimated Total</span><span id="total-val" style="font-weight:600;">£0.00</span>
+      </div>
+      <div class="promo-input-group">
+        <input type="text" id="promo-code" class="form-control" style="padding:10px;" placeholder="Promo Code">
+        <button class="btn btn-secondary btn-sm" onclick="applyPromo()">Apply</button>
+      </div>
+      <div id="promo-message" style="margin-top:8px;font-size:0.8rem;"></div>
+      <a href="/Home/Checkout" class="btn btn-primary btn-full btn-lg" style="margin-top:32px;text-align:center;text-transform:uppercase;font-family:var(--font-btn);font-size:0.78rem;letter-spacing:0.12em;">
+        Proceed to Checkout
+      </a>
+      <a href="/Home/Shop" class="btn btn-secondary btn-full btn-sm" style="margin-top:12px;text-align:center;text-transform:uppercase;font-family:var(--font-btn);font-size:0.7rem;letter-spacing:0.1em;">Continue Shopping</a>
+    </div>
+  </div>
+</div>
+
+@section ExtraJs {
+<script>
+  let activePromoCode = '';
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function renderCart() {
+    let cart = getCart();
+    const layout = document.getElementById('cart-layout-container');
+    const emptyMsg = document.getElementById('empty-cart-msg');
+    
+    if (cart.length === 0) {
+      layout.style.display = 'none';
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    
+    layout.style.display = 'grid';
+    emptyMsg.style.display = 'none';
+    
+    const tbody = document.querySelector('.cart-table tbody');
+    tbody.innerHTML = '';
+    
+    let subtotal = 0;
+    cart.forEach((item, index) => {
+      let itemTotal = item.price * item.qty;
+      subtotal += itemTotal;
+      
+      tbody.innerHTML += `
+        <tr>
+          <td>
+            <div class="cart-item-detail">
+              <img src="/${item.image}" alt="${escapeHtml(item.name)}" class="cart-item-img">
+              <div>
+                <a href="/Home/Product/${item.id}" class="cart-item-name">${escapeHtml(item.name)}</a>
+                <div class="cart-item-meta">Style: ${escapeHtml(item.color)}</div>
+                <div class="cart-item-meta" style="margin-top:4px;">£${item.price.toFixed(2)}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="cart-qty-selector">
+              <button class="cart-qty-btn" onclick="updateQty(${index}, -1)"><i class="fa-solid fa-minus"></i></button>
+              <input type="text" class="cart-qty-input" value="${item.qty}" readonly>
+              <button class="cart-qty-btn" onclick="updateQty(${index}, 1)"><i class="fa-solid fa-plus"></i></button>
+            </div>
+          </td>
+          <td class="text-right" style="font-weight:500;">£${itemTotal.toFixed(2)}</td>
+          <td style="padding-left:0;text-align:center;">
+            <button class="cart-remove-btn" title="Remove" onclick="removeItem(${index})"><i class="fa-regular fa-trash-can"></i></button>
+          </td>
+        </tr>
+      `;
+    });
+    
+    // Summary
+    document.getElementById('subtotal-val').textContent = `£${subtotal.toFixed(2)}`;
+    
+    // Promo calculations
+    let discount = 0;
+    if (activePromoCode) {
+      const promos = { WELCOME15: 0.15, ZARA10: 0.10, BEADS20: 0.20 };
+      if (promos[activePromoCode]) {
+        discount = subtotal * promos[activePromoCode];
+        document.getElementById('discount-row').style.display = 'flex';
+        document.getElementById('discount-label').textContent = `Promo Discount (${activePromoCode})`;
+        document.getElementById('discount-amount').textContent = `-£${discount.toFixed(2)}`;
+      }
+    } else {
+      document.getElementById('discount-row').style.display = 'none';
+    }
+    
+    let baseSubtotal = subtotal - discount;
+    let shipping = baseSubtotal >= 150 ? 0 : 12;
+    document.getElementById('shipping-val').textContent = shipping === 0 ? 'Free' : `£${shipping.toFixed(2)}`;
+    
+    let total = baseSubtotal + shipping;
+    document.getElementById('total-val').textContent = `£${total.toFixed(2)}`;
+  }
+
+  function updateQty(index, delta) {
+    let cart = getCart();
+    if (index >= 0 && index < cart.length) {
+      cart[index].qty += delta;
+      if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+      } else if (cart[index].qty > 10) {
+        cart[index].qty = 10;
+        alert("Maximum limit of 10 items per product reached.");
+      }
+      saveCart(cart);
+      renderCart();
+    }
+  }
+
+  function removeItem(index) {
+    let cart = getCart();
+    if (index >= 0 && index < cart.length) {
+      cart.splice(index, 1);
+      saveCart(cart);
+      renderCart();
+    }
+  }
+
+  function applyPromo() {
+    const code = document.getElementById('promo-code').value.toUpperCase().trim();
+    const msg = document.getElementById('promo-message');
+    const promos = { WELCOME15: 0.15, ZARA10: 0.10, BEADS20: 0.20 };
+    
+    if (promos[code]) {
+      activePromoCode = code;
+      msg.textContent = 'Promo applied successfully!';
+      msg.style.color = 'var(--success)';
+      renderCart();
+    } else {
+      activePromoCode = '';
+      msg.textContent = 'Invalid promo code.';
+      msg.style.color = 'var(--error)';
+      renderCart();
+    }
+  }
+
+  // Initial render
+  document.addEventListener("DOMContentLoaded", renderCart);
+</script>
+}

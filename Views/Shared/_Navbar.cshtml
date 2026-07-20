@@ -1,0 +1,224 @@
+@inject Microsoft.AspNetCore.Identity.UserManager<NehasBeed.Models.ApplicationUser> UserManager
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    
+    string displayName = "";
+    if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        var appUser = await UserManager.GetUserAsync(User);
+        var rawName = appUser?.FullName ?? (User.Identity?.Name?.Split('@')[0] ?? "");
+        // For Admin role, just show "Admin"; for users, cap at first name (max 12 chars)
+        if (User.IsInRole("Admin"))
+            displayName = "Admin";
+        else
+            displayName = rawName.Length > 12 ? rawName.Substring(0, 12) + "…" : rawName;
+    }
+}
+
+@* Announcement Bar *@
+<div class="announcement-bar">
+  ✦ Free worldwide shipping on orders over £150 &nbsp;|&nbsp; Handcrafted with love ✦
+</div>
+
+@* Header *@
+<header class="site-header" id="site-header">
+  <div class="container">
+    <nav class="nav-wrapper">
+      @* Logo *@
+      <a href="/" class="nav-logo">
+        NEHAS BEED
+        <span>Handcrafted Luxury</span>
+      </a>
+
+      @* Nav Links *@
+      <ul class="nav-links">
+        <li><a href="/" class="@(action == "Index" && controller == "Home" ? "active" : "")">Home</a></li>
+        
+        <li class="shop-dropdown-parent">
+          <a href="/Home/Shop" class="@(action == "Shop" ? "active" : "")" style="display:flex;align-items:center;gap:4px;">
+            Shop <i class="fa-solid fa-chevron-down" style="font-size:0.65rem;"></i>
+          </a>
+          <div class="shop-dropdown">
+            <a href="/Home/Shop">Shop All</a>
+            <a href="/Home/Shop?cat=Beaded bags">Beaded Bags</a>
+            <a href="/Home/Shop?cat=Chain">Chain</a>
+            <a href="/Home/Shop?cat=Necklaces">Necklaces</a>
+            <a href="/Home/Shop?cat=Earings">Earings</a>
+            <a href="/Home/Shop?cat=Rings">Rings</a>
+            <a href="/Home/Shop?cat=Hair Accessories">Hair Accessories</a>
+            <a href="/Home/Shop?cat=Mobile Accessories">Mobile Accessories</a>
+            <a href="/Home/Shop?cat=Suncatchers">Suncatchers</a>
+          </div>
+        </li>
+
+        <li><a href="/Home/NewArrivals" class="@(action == "NewArrivals" ? "active" : "")">New Arrivals</a></li>
+        <li><a href="/Home/About" class="@(action == "About" ? "active" : "")">About Us</a></li>
+        <li><a href="/Home/Contact" class="@(action == "Contact" ? "active" : "")">Contact Us</a></li>
+        <li><a href="/Home/FAQ" class="@(action == "FAQ" ? "active" : "")">FAQs</a></li>
+      </ul>
+
+      @* Actions *@
+      <div class="nav-actions">
+        <button class="nav-icon-btn" onclick="document.getElementById('search-bar').classList.toggle('hidden')" title="Search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+        @* User Menu *@
+        <div class="user-menu">
+          <button class="nav-icon-btn" id="user-menu-btn" title="Account" style="display:flex;align-items:center;gap:6px;">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+              <i class="fa-solid fa-circle-user" style="font-size:1.1rem;color:var(--taupe);"></i>
+              <span style="font-size:0.75rem;font-weight:500;letter-spacing:0.04em;" class="show-md">@displayName</span>
+            }
+            else
+            {
+              <i class="fa-regular fa-user"></i>
+            }
+          </button>
+          
+          <div class="user-dropdown" id="user-dropdown">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+              @if (User.IsInRole("Admin"))
+              {
+                <a href="/Admin/Dashboard"><i class="fa-solid fa-gauge"></i> Admin Panel</a>
+                <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+                <form method="post" action="/Account/Logout" style="margin:0" id="navbar-logout-form">
+                  @Html.AntiForgeryToken()
+                  <button type="submit" style="width:100%;text-align:left;padding:12px 16px;color:var(--error);font-size:0.82rem;display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;font-family:inherit;text-transform:uppercase;font-weight:500;letter-spacing:0.05em;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                  </button>
+                </form>
+              }
+              else
+              {
+                <a href="/Account/Profile" style="pointer-events:none;opacity:0.5;"><i class="fa-solid fa-user-circle"></i> @displayName</a>
+                <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+                <form method="post" action="/Account/Logout" style="margin:0" id="navbar-logout-form">
+                  @Html.AntiForgeryToken()
+                  <button type="submit" style="width:100%;text-align:left;padding:12px 16px;color:var(--error);font-size:0.82rem;display:flex;align-items:center;gap:10px;background:none;border:none;cursor:pointer;font-family:inherit;text-transform:uppercase;font-weight:500;letter-spacing:0.05em;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                  </button>
+                </form>
+              }
+            }
+            else
+            {
+              <a href="/Account/Login" style="text-transform:uppercase;font-weight:500;letter-spacing:0.05em;"><i class="fa-solid fa-right-to-bracket"></i> Login</a>
+              <a href="/Account/Register" style="text-transform:uppercase;font-weight:500;letter-spacing:0.05em;"><i class="fa-solid fa-user-plus"></i> Register</a>
+            }
+          </div>
+        </div>
+
+        @if (!User.IsInRole("Admin"))
+        {
+          <a href="/Home/Cart" class="nav-icon-btn" title="Cart" style="position:relative">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="cart-badge" id="global-cart-badge">0</span>
+          </a>
+        }
+
+        @* Mobile toggle *@
+        <button class="menu-toggle" id="menu-toggle" title="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  @* Search Bar *@
+  <div class="hidden" id="search-bar" style="padding:14px 0; background:var(--bg-dark); border-top:1px solid var(--border);">
+    <div class="container" style="display:flex; justify-content:center; align-items:center; gap:10px;">
+      <div style="position:relative; max-width:600px; width:100%; display:flex; align-items:center;">
+        <input type="search" placeholder="Search for products (e.g. Mosaic, Pearl)..." class="form-control"
+               style="width:100%; padding-right:45px;" id="search-input">
+        <button onclick="performSearch()" style="position:absolute; right:15px; background:none; border:none; cursor:pointer; color:var(--mid); font-size:1.1rem;">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+@* Mobile Nav *@
+<nav class="mobile-nav" id="mobile-nav">
+  <div class="mobile-nav-overlay" id="nav-overlay"></div>
+  <div class="mobile-nav-drawer">
+    <div class="mobile-nav-header">
+      <span class="nav-logo" style="font-size:1.4rem">NEHAS BEED</span>
+      <button class="mobile-close" id="mobile-close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mobile-nav-links">
+      <a href="/">Home</a>
+      
+      <div style="padding: 10px 28px; font-weight:600; font-size:0.75rem; text-transform:uppercase; color:var(--mid); border-bottom:1px solid var(--border); margin-top:10px;">Shop By Category</div>
+      <a href="/Home/Shop" style="padding-left:40px;">Shop All</a>
+      <a href="/Home/Shop?cat=Beaded bags" style="padding-left:40px;">Beaded Bags</a>
+      <a href="/Home/Shop?cat=Chain" style="padding-left:40px;">Chain</a>
+      <a href="/Home/Shop?cat=Necklaces" style="padding-left:40px;">Necklaces</a>
+      <a href="/Home/Shop?cat=Earings" style="padding-left:40px;">Earings</a>
+      <a href="/Home/Shop?cat=Rings" style="padding-left:40px;">Rings</a>
+      <a href="/Home/Shop?cat=Hair Accessories" style="padding-left:40px;">Hair Accessories</a>
+      <a href="/Home/Shop?cat=Mobile Accessories" style="padding-left:40px;">Mobile Accessories</a>
+      <a href="/Home/Shop?cat=Suncatchers" style="padding-left:40px;">Suncatchers</a>
+      
+      <div style="padding: 10px 28px; font-weight:600; font-size:0.75rem; text-transform:uppercase; color:var(--mid); border-bottom:1px solid var(--border); margin-top:15px;">Discover</div>
+      <a href="/Home/NewArrivals">New Arrivals</a>
+      <a href="/Home/About">About Us</a>
+      <a href="/Home/Contact">Contact Us</a>
+      <a href="/Home/FAQ">FAQs</a>
+
+      @if (User.Identity != null && User.Identity.IsAuthenticated)
+      {
+        <div style="padding: 10px 28px; font-weight:600; font-size:0.75rem; text-transform:uppercase; color:var(--mid); border-bottom:1px solid var(--border); margin-top:15px;">Account (@displayName)</div>
+        @if (User.IsInRole("Admin"))
+        {
+          <a href="/Admin/Dashboard">Admin Panel</a>
+        }
+        <form method="post" action="/Account/Logout" id="mobile-logout-form">
+          @Html.AntiForgeryToken()
+          <button type="submit" style="width:100%;text-align:left;color:var(--error);font-size:inherit;background:none;border:none;cursor:pointer;padding:14px 28px;font-family:inherit;display:flex;align-items:center;gap:10px;text-transform:uppercase;font-weight:500;">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </button>
+        </form>
+      }
+      else
+      {
+        <div style="padding: 10px 28px; font-weight:600; font-size:0.75rem; text-transform:uppercase; color:var(--mid); border-bottom:1px solid var(--border); margin-top:15px;">Account</div>
+        <a href="/Account/Login">Login</a>
+        <a href="/Account/Register">Register</a>
+      }
+    </div>
+  </div>
+</nav>
+
+<script>
+  function performSearch() {
+    const input = document.getElementById('search-input');
+    if (input) {
+      const q = input.value.trim();
+      if (q) {
+        window.location.href = '/Home/Shop?search=' + encodeURIComponent(q);
+      }
+    }
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+      // Pre-fill query if already searching
+      const params = new URLSearchParams(window.location.search);
+      const urlSearch = params.get('search') || '';
+      if (urlSearch) {
+        searchInput.value = urlSearch;
+        document.getElementById('search-bar').classList.remove('hidden');
+      }
+    }
+  });
+</script>

@@ -1,0 +1,58 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+}
+@* Admin Sidebar *@
+<aside class="sidebar" id="admin-sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-name">NEHAS BEED</div>
+    <div class="sidebar-brand-tag">Admin Panel</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="sidebar-avatar">A</div>
+    <div>
+      <div class="sidebar-user-name">@User.Identity?.Name</div>
+      <div class="sidebar-user-role">Super Admin</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a href="/Admin/Dashboard" class="nav-link @(action == "Dashboard" ? "active" : "")">
+      <i class="fa-solid fa-gauge-high"></i> Dashboard
+    </a>
+
+    <div class="nav-section-label">Store</div>
+    <a href="/Admin/Products" class="nav-link @(action == "Products" || action == "CreateProduct" || action == "EditProduct" || action == "ProductDetails" ? "active" : "")">
+      <i class="fa-solid fa-bag-shopping"></i> Products
+    </a>
+    <a href="/Admin/Orders" class="nav-link @(action == "Orders" || action == "Invoice" ? "active" : "")">
+      <i class="fa-solid fa-receipt"></i> Orders
+    </a>
+    <a href="/Admin/Cancellations" class="nav-link @(action == "Cancellations" ? "active" : "")">
+      <i class="fa-solid fa-rectangle-xmark"></i> Cancellations
+    </a>
+
+    <div class="nav-section-label">Users</div>
+    <a href="/Admin/Users" class="nav-link @(action == "Users" || action == "CreateUser" ? "active" : "")">
+      <i class="fa-solid fa-users"></i> Users
+    </a>
+
+    <div class="nav-section-label">Tools</div>
+    <a href="/Admin/Notifications" class="nav-link @(action == "Notifications" ? "active" : "")">
+      <i class="fa-solid fa-bell"></i> Notifications
+    </a>
+    <a href="/Admin/EmailLogs" class="nav-link @(action == "EmailLogs" || action == "ViewEmailLog" ? "active" : "")">
+      <i class="fa-solid fa-envelope"></i> Email Logs
+    </a>
+
+    <div class="nav-section-label">Settings</div>
+    <a href="/" class="nav-link">
+      <i class="fa-solid fa-arrow-up-right-from-square"></i> View Store
+    </a>
+  </nav>
+
+
+</aside>
+
+

@@ -1,0 +1,73 @@
+@model NehasBeed.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Create Account – NEHAS BEED";
+}
+
+@section ExtraCss {
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true">
+<style>
+  .auth-container { max-width:480px; margin:60px auto; background:var(--white); border-radius:var(--r-lg); border:1px solid var(--border); padding:48px; box-shadow:var(--shadow-sm); }
+  .auth-title { font-size:2.2rem; text-align:center; margin-bottom:8px; font-style:italic; }
+  .auth-subtitle { text-align:center; color:var(--mid); font-size:0.88rem; margin-bottom:32px; }
+  .auth-links-row { text-align:center; font-size:0.82rem; margin-top:16px; }
+  .auth-links-row a { color:var(--taupe); }
+</style>
+}
+
+<div class="container">
+  <div class="auth-container animate-fade-up">
+    <h2 class="auth-title">Join NEHAS BEED</h2>
+    <p class="auth-subtitle">Create your account to start shopping</p>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+      <div style="background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:20px;font-size:0.85rem;color:var(--error);">
+        <div asp-validation-summary="All"></div>
+      </div>
+    }
+
+    <form method="post" asp-action="Register" asp-controller="Account">
+      @Html.AntiForgeryToken()
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div class="form-group">
+          <label class="form-label" asp-for="FirstName">First Name</label>
+          <input type="text" asp-for="FirstName" class="form-control" placeholder="Sophia" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" asp-for="LastName">Last Name</label>
+          <input type="text" asp-for="LastName" class="form-control" placeholder="Loren" required>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label" asp-for="Email">Email Address</label>
+        <input type="email" asp-for="Email" class="form-control" placeholder="name@domain.com" required>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label" asp-for="Password">Password</label>
+        <div style="position:relative;">
+          <input type="password" asp-for="Password" class="form-control" placeholder="Min 6 characters" required>
+          <button type="button" data-toggle-password="Password" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mid);font-size:0.9rem;">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:24px;">
+        <label class="form-label" asp-for="ConfirmPassword">Confirm Password</label>
+        <input type="password" asp-for="ConfirmPassword" class="form-control" placeholder="Repeat password" required>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:24px;font-size:0.82rem;color:var(--mid);">
+        <input type="checkbox" name="terms" required style="accent-color:var(--taupe);width:16px;height:16px;margin-top:2px;">
+        <span>I agree to the <a href="#" style="color:var(--taupe);">Terms of Service</a> and <a href="#" style="color:var(--taupe);">Privacy Policy</a></span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Create Account</button>
+    </form>
+
+    <div class="auth-links-row">
+      <span style="color:var(--mid)">Already have an account? <a href="/Account/Login">Sign In</a></span>
+    </div>
+  </div>
+</div>
+
+@section ExtraJs {
+<script src="~/js/auth.js" asp-append-version="true"></script>
+}

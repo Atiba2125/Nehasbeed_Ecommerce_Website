@@ -1,0 +1,334 @@
+@model List<NehasBeed.Models.Product>
+@{
+    ViewData["Title"] = "NEHAS BEED | Handcrafted Luxury Accessories";
+    ViewData["MetaDescription"] = "Discover NEHAS BEED – handcrafted beaded bags, chains, necklaces and accessories. Each piece is a unique work of art made by skilled artisans.";
+}
+
+@section ExtraCss {
+<style>
+  .cat-bg-bags       { background: linear-gradient(135deg,#a8d8d0,#6ab5aa,#4a9088); }
+  .cat-bg-chains     { background: linear-gradient(135deg,#d4af5a,#c9a96e,#b8935a); }
+  .cat-bg-necklaces  { background: linear-gradient(135deg,#d4788a,#c06070,#a84a5a); }
+  .cat-bg-accessories{ background: linear-gradient(135deg,#8a78c9,#7068b8,#5858a8); }
+  .insta-strip { display:grid; grid-template-columns:repeat(6,1fr); gap:2px; }
+  .insta-item  { aspect-ratio:1; overflow:hidden; cursor:pointer; position:relative; }
+  .insta-item::after { content:''; position:absolute; inset:0; background:rgba(17,17,17,0.3); opacity:0; transition:opacity 0.3s; }
+  .insta-item:hover::after { opacity:1; }
+  .insta-bg { width:100%; height:100%; transition: transform 0.5s; }
+  .insta-item:hover .insta-bg { transform:scale(1.08); }
+  .hero-badge { position:absolute; bottom:40px; right:clamp(24px,5vw,80px); background:rgba(255,255,255,0.95); backdrop-filter:blur(8px); padding:20px 28px; border-radius:var(--r-md); box-shadow:var(--shadow-md); display:flex; flex-direction:column; gap:4px; }
+  .hero-badge-num { font-family:var(--font-heading); font-size:2.5rem; font-weight:300; line-height:1; color:var(--ink); }
+  .hero-badge-label { font-family:var(--font-btn); font-size:0.65rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--taupe); }
+  .promo-stripe { background: var(--grad-taupe); color:var(--white); padding:40px 0; text-align:center; }
+  .promo-stripe h3 { font-size:clamp(1.6rem,3vw,2.8rem); font-style:italic; margin-bottom:12px; }
+  .values-row { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .value-item { padding:32px 24px; text-align:center; border-right:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .value-item:last-child { border-right:none; }
+  .value-icon { font-size:1.6rem; color:var(--taupe); }
+  .value-title { font-family:var(--font-btn); font-size:0.7rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; }
+  .value-text { font-size:0.82rem; color:var(--mid); line-height:1.6; }
+  .review-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.1); transform: translateY(-4px); }
+  @@media(max-width:768px) {
+    .values-row { grid-template-columns:1fr 1fr; }
+    .value-item:nth-child(2) { border-right:none; }
+    .insta-strip { grid-template-columns:repeat(3,1fr); }
+    .hero-badge { display:none; }
+    .reviews-track .review-card { min-width: 290px !important; }
+  }
+  @@media(max-width:480px) { .values-row { grid-template-columns:1fr; } .value-item { border-right:none; } }
+</style>
+}
+
+@* HERO *@
+<section class="hero">
+  <img src="~/images/hero-bg.png" alt="Luxury beaded accessories" class="hero-bg" id="hero-img">
+  <div class="hero-overlay"></div>
+  <div class="hero-content animate-fade-up">
+    <p class="hero-eyebrow">New Collection 2025</p>
+    <h1>Art You<br>Carry With You</h1>
+    <p class="hero-subtitle">Each piece handcrafted with thousands of Miyuki seed beads — wearable art that tells your story.</p>
+    <div class="hero-actions">
+      <a href="/Home/Shop" class="btn btn-gold btn-lg">Explore Collection</a>
+      <a href="/Home/Shop?cat=bags" class="btn btn-outline-white btn-lg">View Bags</a>
+    </div>
+  </div>
+  <div class="hero-badge">
+    <span class="hero-badge-num">40+</span>
+    <span class="hero-badge-label">Hours per piece</span>
+  </div>
+</section>
+
+@* VALUES ROW *@
+<div class="values-row">
+  <div class="value-item reveal">
+    <div class="value-icon"><i class="fa-solid fa-hand-sparkles"></i></div>
+    <div class="value-title">Handcrafted</div>
+    <div class="value-text">Every bead placed by hand by skilled artisans</div>
+  </div>
+  <div class="value-item reveal delay-100">
+    <div class="value-icon"><i class="fa-solid fa-truck-fast"></i></div>
+    <div class="value-title">Free Shipping</div>
+    <div class="value-text">Complimentary worldwide shipping over £150</div>
+  </div>
+  <div class="value-item reveal delay-200">
+    <div class="value-icon"><i class="fa-solid fa-arrows-rotate"></i></div>
+    <div class="value-title">Easy Returns</div>
+    <div class="value-text">30-day hassle-free return policy</div>
+  </div>
+  <div class="value-item reveal delay-300">
+    <div class="value-icon"><i class="fa-solid fa-leaf"></i></div>
+    <div class="value-title">Sustainable</div>
+    <div class="value-text">Eco-conscious packaging and materials</div>
+  </div>
+</div>
+
+@* CATEGORIES *@
+<section class="categories-section">
+  <div class="container">
+    <p class="section-eyebrow">Curated Collections</p>
+    <h2 class="section-title">Shop by Category</h2>
+    <div class="categories-grid">
+      <a href="/Home/Shop?cat=bags" class="category-card">
+        <div class="category-card-bg cat-bg-bags" style="display:flex;align-items:center;justify-content:center;">
+          <img src="~/images/bag-1.png" alt="Beaded Bags" style="width:80%;height:100%;object-fit:cover;" class="category-card-img">
+        </div>
+        <div class="category-card-overlay"></div>
+        <div class="category-card-content">
+          <div class="category-card-label">Handcrafted</div>
+          <div class="category-card-name">Beaded Bags</div>
+          <span class="category-card-link">Shop Now <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+      </a>
+      <a href="/Home/Shop?cat=chains" class="category-card">
+        <div class="category-card-bg cat-bg-chains" style="display:flex;align-items:center;justify-content:center;font-size:8rem;color:rgba(255,255,255,0.4);">⛓</div>
+        <div class="category-card-overlay"></div>
+        <div class="category-card-content">
+          <div class="category-card-label">Statement</div>
+          <div class="category-card-name">Chains</div>
+          <span class="category-card-link">Shop Now <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+      </a>
+      <a href="/Home/Shop?cat=necklaces" class="category-card">
+        <div class="category-card-bg cat-bg-necklaces" style="display:flex;align-items:center;justify-content:center;">
+          <img src="~/images/bag-4.png" alt="Necklaces" style="width:80%;height:100%;object-fit:cover;" class="category-card-img">
+        </div>
+        <div class="category-card-overlay"></div>
+        <div class="category-card-content">
+          <div class="category-card-label">Beaded</div>
+          <div class="category-card-name">Necklaces</div>
+          <span class="category-card-link">Shop Now <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+      </a>
+      <a href="/Home/Shop?cat=accessories" class="category-card">
+        <div class="category-card-bg cat-bg-accessories" style="display:flex;align-items:center;justify-content:center;font-size:7rem;color:rgba(255,255,255,0.4);">✦</div>
+        <div class="category-card-overlay"></div>
+        <div class="category-card-content">
+          <div class="category-card-label">Curated</div>
+          <div class="category-card-name">Accessories</div>
+          <span class="category-card-link">Shop Now <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+@* FEATURED PRODUCTS *@
+<section class="products-section">
+  <div class="container">
+    <div class="products-header">
+      <div>
+        <p class="section-eyebrow">Our Selection</p>
+        <h2 class="section-title">Featured Pieces</h2>
+      </div>
+      <a href="/Home/Shop" class="btn btn-secondary">View All Products</a>
+    </div>
+    <div class="products-grid" id="featured-products">
+      @foreach (var product in Model)
+      {
+        <article class="product-card reveal" data-id="@product.Id">
+          <div class="product-card-img-wrap">
+            <img src="~/@product.Image" alt="@product.Name" class="product-card-img" loading="lazy">
+            @if (product.Badge != null)
+            {
+              <span class="product-card-badge @product.Badge.ToLower().Replace(" ", "-")">@product.Badge</span>
+            }
+            <div class="product-card-actions">
+              <button class="product-action-btn" onclick="toggleWish(this)" title="Wishlist">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+              <a href="/Home/Product/@product.Id" class="product-action-btn" title="Quick View">
+                <i class="fa-regular fa-eye"></i>
+              </a>
+            </div>
+            <button type="button" class="product-card-quick-add" style="border:none;cursor:pointer;width:100%;text-align:center;" onclick="event.preventDefault(); addToCartDirect(@product.Id, '@Html.Raw(product.Name.Replace("'", "\\'"))', @product.Price, '@product.Image')">Add to Cart</button>
+          </div>
+          <div class="product-card-info">
+            <span class="product-card-category">@product.Category</span>
+            <a href="/Home/Product/@product.Id" class="product-card-name">@product.Name</a>
+            <div class="product-card-rating">
+              <span class="stars">@product.GetStars()</span>
+              <span class="review-count">(@product.Reviews)</span>
+            </div>
+            <div class="product-card-price">
+              <span class="price-current">£@product.Price.ToString("F2")</span>
+              @if (product.OriginalPrice.HasValue)
+              {
+                <span class="price-original">£@product.OriginalPrice.Value.ToString("F2")</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+@* PROMO STRIPE *@
+<div class="promo-stripe">
+  <div class="container">
+    <h3>Made to Order — Your Dream Piece Awaits</h3>
+    <p style="opacity:0.8;margin-bottom:24px;font-size:0.95rem;">Can't find exactly what you want? We create custom beaded accessories tailored to your vision.</p>
+    <a href="/Home/Shop" class="btn btn-outline-white">Explore Custom Orders</a>
+  </div>
+</div>
+
+@* BRAND STORY *@
+<section class="brand-story">
+  <div class="container">
+    <div class="brand-story-grid">
+      <div class="brand-story-img-wrap reveal">
+        <img src="~/images/bag-2.png" alt="Artisan at work" class="brand-story-img" style="border-radius:var(--r-lg);">
+        <img src="~/images/bag-5.png" alt="Beaded detail" class="brand-story-img-accent">
+      </div>
+      <div class="brand-story-text reveal delay-200">
+        <p class="section-eyebrow">Our Story</p>
+        <h2 class="section-title" style="font-style:italic">Crafted<br>with Intention</h2>
+        <p class="brand-story-quote">"Every bead is a meditation, every piece a poem."</p>
+        <p style="color:var(--mid);line-height:1.9;font-size:0.92rem;">
+          NEHAS BEED was born from a passion for the ancient art of beadwork. Each accessory takes 40 to 120 hours to complete – the result of skilled hands, premium Japanese Miyuki seed beads, and an unwavering dedication to quality.
+        </p>
+        <p style="color:var(--mid);line-height:1.9;font-size:0.92rem;">
+          We work with a small collective of artisans who bring cultural heritage and modern aesthetics together in every single piece.
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;padding-top:8px;">
+          <div>
+            <div style="font-family:var(--font-heading);font-size:2.5rem;font-weight:300;color:var(--taupe);">500+</div>
+            <div style="font-family:var(--font-btn);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid);">Unique designs</div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-heading);font-size:2.5rem;font-weight:300;color:var(--taupe);">12K+</div>
+            <div style="font-family:var(--font-btn);font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--mid);">Happy customers</div>
+          </div>
+        </div>
+        <a href="/Home/Shop" class="btn btn-primary" style="align-self:flex-start">Discover Our Story</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+@* INSTAGRAM GALLERY *@
+<div style="background:var(--bg-alt);padding:56px 0;">
+  <div style="text-align:center;margin-bottom:32px;">
+    <p class="section-eyebrow" style="justify-content:center;">Follow Our Journey</p>
+    <h3 style="font-style:italic;font-family:var(--font-heading)">@@zarabeads</h3>
+  </div>
+  <div class="insta-strip" id="insta-strip">
+    @foreach (var img in new[] { "bag-1.png","bag-2.png","bag-3.png","bag-4.png","bag-5.png","bag-1.png" })
+    {
+      <div class="insta-item">
+        <div class="insta-bg" style="height:100%;overflow:hidden;">
+          <img src="~/images/@img" alt="Instagram" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+@* CUSTOMER REVIEWS *@
+<section id="reviews" style="padding: 96px 0; background: #fff;">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 56px;">
+      <p class="section-eyebrow" style="justify-content:center;">Real Stories</p>
+      <h2 class="section-title" style="font-style:italic;">What Our Customers Say</h2>
+      <p style="color:var(--mid); font-size:0.92rem; max-width:520px; margin: 12px auto 0; line-height:1.8;">
+        Every review is a reminder of why we pour our hearts into every single bead.
+      </p>
+      <div style="display:inline-flex; align-items:center; gap:14px; margin-top:24px; background:#f7f6f2; border:1px solid #e8e5e0; border-radius:99px; padding:10px 24px;">
+        <span style="color:#c9a96e; font-size:1.3rem; letter-spacing:2px;">★★★★★</span>
+        <span style="font-size:0.88rem; font-weight:600; color:#111;">4.9 / 5</span>
+        <span style="width:1px; height:18px; background:#ddd;"></span>
+        <span style="font-size:0.78rem; color:#888;">Based on 2,400+ reviews</span>
+      </div>
+    </div>
+    <div style="position:relative; overflow:hidden;">
+      <div class="reviews-track" id="reviews-track" style="display:flex; gap:24px; transition:transform 0.5s cubic-bezier(0.4,0,0.2,1); will-change:transform;">
+        @{
+          var reviews = new[]
+          {
+            new { Initials="SL", Name="Sophia Loren", Location="London, UK", Product="Mosaic Tote", Bg="linear-gradient(135deg,#857870,#c9a96e)", Stars="★★★★★", Dark=false, Badge="Verified Buyer", Text="\"I ordered the Mosaic Tote and I am absolutely obsessed. The craftsmanship is unlike anything I've seen. Every single bead is perfectly placed — it looks even better in person.\"" },
+            new { Initials="AH", Name="Audrey Hepburn", Location="Paris, France", Product="Sovereign Chain", Bg="linear-gradient(135deg,#7b5ea7,#d4788a)", Stars="★★★★★", Dark=false, Badge="Verified Buyer", Text="\"The Sovereign Chain arrived beautifully packaged. I wore it to a wedding and received so many compliments. People couldn't believe it was handmade. Truly wearable art!\"" },
+            new { Initials="GK", Name="Grace Kelly", Location="Monaco", Product="Pearl Mini", Bg="linear-gradient(135deg,#2980b9,#27ae60)", Stars="★★★★★", Dark=true, Badge="Top Review", Text="\"My Pearl Mini bag is my most treasured possession. The weight, the texture, the pearlescent finish — it screams luxury. Fast shipping and the most gorgeous packaging I've ever received.\"" },
+            new { Initials="MR", Name="Maria Rossi", Location="Milan, Italy", Product="Noir Clutch", Bg="linear-gradient(135deg,#c0392b,#c9a96e)", Stars="★★★★★", Dark=false, Badge="Verified Buyer", Text="\"I've bought 3 pieces and each one is more stunning than the last. The Noir Clutch is so perfectly made — the beads catch the light beautifully. Worth every penny!\"" },
+          };
+        }
+        @foreach (var r in reviews)
+        {
+          <div class="review-card" style="min-width:340px; flex-shrink:0; background:@(r.Dark ? "#111" : "#f7f6f2"); border:1px solid @(r.Dark ? "#222" : "#e8e5e0"); border-radius:20px; padding:28px 28px 24px; display:flex; flex-direction:column; gap:16px; transition:box-shadow 0.2s, transform 0.2s;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <span style="color:#c9a96e; font-size:1.05rem; letter-spacing:2px;">@r.Stars</span>
+              <span style="font-size:0.65rem; letter-spacing:0.14em; text-transform:uppercase; color:@(r.Dark ? "#c9a96e" : "#857870"); font-weight:500; background:rgba(201,169,110,0.1); padding:4px 10px; border-radius:99px;">@r.Badge</span>
+            </div>
+            <p style="font-family:'Cormorant Garamond',Georgia,serif; font-size:1.12rem; font-style:italic; color:@(r.Dark ? "#fff" : "#111"); line-height:1.65;">@r.Text</p>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:auto; padding-top:16px; border-top:1px solid @(r.Dark ? "#333" : "#e8e5e0");">
+              <div style="width:40px; height:40px; border-radius:50%; background:@r.Bg; display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:1rem; color:#fff; font-weight:600; flex-shrink:0;">@r.Initials</div>
+              <div>
+                <div style="font-size:0.85rem; font-weight:600; color:@(r.Dark ? "#fff" : "#111");">@r.Name</div>
+                <div style="font-size:0.72rem; color:@(r.Dark ? "rgba(255,255,255,0.45)" : "#888");">@r.Location &nbsp;·&nbsp; @r.Product</div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:20px; margin-top:40px;">
+      <button onclick="reviewsSlide(-1)" style="width:44px;height:44px;border-radius:50%;border:1.5px solid #e8e5e0;background:#fff;color:#111;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <div style="display:flex; gap:8px;" id="reviews-dots">
+        <button onclick="reviewsGoTo(0)" class="rdot" style="width:8px;height:8px;border-radius:99px;border:none;background:#111;cursor:pointer;transition:all 0.25s;padding:0;"></button>
+        <button onclick="reviewsGoTo(1)" class="rdot" style="width:8px;height:8px;border-radius:99px;border:none;background:#ddd;cursor:pointer;transition:all 0.25s;padding:0;"></button>
+        <button onclick="reviewsGoTo(2)" class="rdot" style="width:8px;height:8px;border-radius:99px;border:none;background:#ddd;cursor:pointer;transition:all 0.25s;padding:0;"></button>
+        <button onclick="reviewsGoTo(3)" class="rdot" style="width:8px;height:8px;border-radius:99px;border:none;background:#ddd;cursor:pointer;transition:all 0.25s;padding:0;"></button>
+      </div>
+      <button onclick="reviewsSlide(1)" style="width:44px;height:44px;border-radius:50%;border:1.5px solid #e8e5e0;background:#fff;color:#111;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+@section ExtraJs {
+<script>
+  function toggleWish(btn) {
+    btn.classList.toggle('wishlisted');
+    const isWish = btn.classList.contains('wishlisted');
+    btn.innerHTML = isWish ? '<i class="fa-solid fa-heart"></i>' : '<i class="fa-regular fa-heart"></i>';
+  }
+  (function() {
+    var track = document.getElementById('reviews-track');
+    var dots  = document.querySelectorAll('.rdot');
+    var current = 0, cardW = 364, total = 4;
+    function updateDots() {
+      dots.forEach(function(d, i) { d.style.background = (i === current) ? '#111' : '#ddd'; d.style.width = (i === current) ? '24px' : '8px'; });
+    }
+    window.reviewsGoTo = function(idx) { current = Math.max(0, Math.min(idx, total - 1)); track.style.transform = 'translateX(-' + (current * cardW) + 'px)'; updateDots(); };
+    window.reviewsSlide = function(dir) { reviewsGoTo(current + dir); };
+    setInterval(function() { current = (current + 1) % total; track.style.transform = 'translateX(-' + (current * cardW) + 'px)'; updateDots(); }, 4000);
+    var startX = 0;
+    if (track) {
+      track.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; });
+      track.addEventListener('touchend', function(e) { var diff = startX - e.changedTouches[0].clientX; if (Math.abs(diff) > 40) reviewsSlide(diff > 0 ? 1 : -1); });
+    }
+  })();
+</script>
+}

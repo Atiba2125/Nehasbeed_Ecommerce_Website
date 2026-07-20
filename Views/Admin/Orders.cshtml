@@ -1,0 +1,107 @@
+@model List<NehasBeed.Models.Order>
+@{
+    ViewData["Title"] = "Orders";
+    ViewData["PageTitle"] = "Orders";
+    string search = ViewBag.Search ?? "";
+}
+
+@if (TempData["Success"] != null)
+{
+  <div style="background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3);border-radius:10px;padding:14px 20px;margin-bottom:20px;font-size:0.88rem;color:#1e8449;display:flex;align-items:center;gap:10px;">
+    <i class="fa-solid fa-circle-check"></i> @TempData["Success"]
+  </div>
+}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;font-weight:400;font-style:italic;">Orders</h1>
+    <p style="font-size:0.82rem;color:var(--mid);margin-top:4px;">@Model.Count total orders</p>
+  </div>
+  @* Status Summary Badges *@
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    @{
+      var pending    = Model.Count(o => o.Status == "Pending");
+      var confirmed  = Model.Count(o => o.Status == "Confirmed");
+      var dispatched = Model.Count(o => o.Status == "Dispatched");
+      var cancelled  = Model.Count(o => o.Status == "Cancelled");
+    }
+    <span style="padding:6px 14px;border-radius:99px;font-size:0.72rem;font-weight:600;background:rgba(243,156,18,0.12);color:#d68910;">Pending (@pending)</span>
+    <span style="padding:6px 14px;border-radius:99px;font-size:0.72rem;font-weight:600;background:rgba(39,174,96,0.12);color:var(--success);">Confirmed (@confirmed)</span>
+    <span style="padding:6px 14px;border-radius:99px;font-size:0.72rem;font-weight:600;background:rgba(52,152,219,0.12);color:#3498db;">Dispatched (@dispatched)</span>
+    <span style="padding:6px 14px;border-radius:99px;font-size:0.72rem;font-weight:600;background:rgba(127,140,141,0.12);color:#7f8c8d;">Cancelled (@cancelled)</span>
+  </div>
+</div>
+
+
+
+@* Orders Table *@
+<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead>
+      <tr>
+        @foreach (var h in new[] { "Invoice", "Customer", "Date", "Amount", "Status", "Actions" })
+        {
+          <th style="padding:14px 20px;font-size:0.67rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--mid);background:#f9f8f5;border-bottom:1px solid var(--border);text-align:left;">@h</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @if (Model.Count == 0)
+      {
+        <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--mid);">No orders found.</td></tr>
+      }
+      @foreach (var order in Model)
+      {
+        <tr onmouseover="this.querySelectorAll('td').forEach(t=>t.style.background='#fcfbf8')" onmouseout="this.querySelectorAll('td').forEach(t=>t.style.background='')">
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.82rem;font-weight:600;color:var(--taupe);">@order.InvoiceNumber</td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.85rem;">
+            <div style="font-weight:500;">@order.CustomerName</div>
+            <div style="font-size:0.72rem;color:var(--mid);">@order.CustomerEmail</div>
+          </td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.82rem;color:var(--mid);">
+            @order.CreatedAt.ToString("dd MMM yyyy")
+          </td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;font-size:0.88rem;font-weight:600;">£@order.TotalAmount.ToString("N2")</td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;">
+            <span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:0.65rem;font-weight:600;text-transform:uppercase;color:@order.GetStatusBadgeColor();background:@order.GetStatusBg();">
+              <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block;"></span>
+              @order.Status
+            </span>
+          </td>
+          <td style="padding:15px 20px;border-bottom:1px solid #f0ede8;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              @* Invoice *@
+              <a href="/Admin/Invoice/@order.Id" target="_blank" title="View Invoice"
+                 style="padding:5px 10px;border:1px solid rgba(52,152,219,0.3);border-radius:7px;font-size:0.72rem;color:#3498db;background:rgba(52,152,219,0.07);text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                <i class="fa-solid fa-file-invoice"></i> Invoice
+              </a>
+              @* Status Actions *@
+              @if (order.Status == "Pending")
+              {
+                <form method="post" action="/Admin/UpdateOrderStatus" style="display:inline;">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="orderId" value="@order.Id">
+                  <input type="hidden" name="status" value="Confirmed">
+                  <button type="submit" style="padding:5px 10px;border:1px solid rgba(39,174,96,0.3);border-radius:7px;font-size:0.72rem;color:var(--success);background:rgba(39,174,96,0.07);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                    <i class="fa-solid fa-check"></i> Confirm
+                  </button>
+                </form>
+              }
+              @if (order.Status == "Confirmed")
+              {
+                <form method="post" action="/Admin/UpdateOrderStatus" style="display:inline;">
+                  @Html.AntiForgeryToken()
+                  <input type="hidden" name="orderId" value="@order.Id">
+                  <input type="hidden" name="status" value="Dispatched">
+                  <button type="submit" style="padding:5px 10px;border:1px solid rgba(52,152,219,0.3);border-radius:7px;font-size:0.72rem;color:#3498db;background:rgba(52,152,219,0.07);cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+                    <i class="fa-solid fa-truck-fast"></i> Dispatch
+                  </button>
+                </form>
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

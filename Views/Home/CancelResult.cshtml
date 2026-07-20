@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "Order Cancellation – NEHAS BEED";
+    var errTitle = ViewBag.ErrorTitle as string;
+    var errMsg = ViewBag.ErrorMessage as string;
+    var succTitle = ViewBag.SuccessTitle as string;
+    var succMsg = ViewBag.SuccessMessage as string;
+}
+
+<div class="container" style="padding: 100px 0; max-width: 600px; text-align: center;">
+  @if (!string.IsNullOrEmpty(errTitle))
+  {
+    <div style="background:var(--bg-card); border: 1px solid var(--border); padding: 48px; border-radius: var(--r-lg); box-shadow: var(--shadow-md);">
+      <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(192,57,43,0.1); color: var(--error); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2rem;">
+        <i class="fa-solid fa-circle-exclamation"></i>
+      </div>
+      <h1 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; margin-bottom: 14px; color: var(--ink);">
+        @errTitle
+      </h1>
+      <p style="font-size: 0.9rem; color: var(--mid); line-height: 1.7; margin-bottom: 28px;">
+        @errMsg
+      </p>
+      <a href="/" class="btn btn-secondary btn-sm" style="display:inline-block; padding: 12px 28px;">Return to Store</a>
+    </div>
+  }
+  else
+  {
+    <div style="background:var(--bg-card); border: 1px solid var(--border); padding: 48px; border-radius: var(--r-lg); box-shadow: var(--shadow-md); position: relative; overflow: hidden;">
+      @* Premium celebratory transition line *@
+      <div style="position: absolute; left: 0; top: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--gold), #7b5ea7);"></div>
+      
+      <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(39,174,96,0.1); color: var(--success); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 2rem; animation: scaleUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      
+      <h1 style="font-family: var(--font-heading); font-size: 2rem; font-weight: 400; margin-bottom: 14px; color: var(--ink);">
+        @succTitle
+      </h1>
+      <p style="font-size: 0.92rem; color: var(--mid); line-height: 1.7; margin-bottom: 28px;">
+        @succMsg
+      </p>
+      <a href="/" class="btn btn-primary" style="display:inline-block; padding: 12px 32px;">Continue Shopping</a>
+    </div>
+  }
+</div>
+
+<style>
+  @@keyframes scaleUp {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+</style>

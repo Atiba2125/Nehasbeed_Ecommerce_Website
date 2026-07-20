@@ -1,0 +1,61 @@
+@model NehasBeed.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Sign In – NEHAS BEED";
+}
+
+@section ExtraCss {
+<link rel="stylesheet" href="~/css/auth.css" asp-append-version="true">
+<style>
+  .auth-container { max-width:450px; margin:80px auto; background:var(--white); border-radius:var(--r-lg); border:1px solid var(--border); padding:48px; box-shadow:var(--shadow-sm); }
+  .auth-title { font-size:2.2rem; text-align:center; margin-bottom:8px; font-style:italic; }
+  .auth-subtitle { text-align:center; color:var(--mid); font-size:0.88rem; margin-bottom:32px; }
+  .auth-links-row { display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; margin-top:16px; }
+  .auth-links-row a { color:var(--taupe); transition:color var(--fast); }
+  .auth-links-row a:hover { color:var(--ink); }
+</style>
+}
+
+<div class="container">
+  <div class="auth-container animate-fade-up">
+    <h2 class="auth-title">Welcome Back</h2>
+    <p class="auth-subtitle">Sign in to your NEHAS BEED account</p>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+      <div style="background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:var(--r-sm);padding:14px 18px;margin-bottom:20px;font-size:0.85rem;color:var(--error);">
+        <div asp-validation-summary="All"></div>
+      </div>
+    }
+
+    <form method="post" asp-action="Login" asp-controller="Account" asp-route-returnUrl="@ViewBag.ReturnUrl">
+      @Html.AntiForgeryToken()
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label" asp-for="Email">Email Address</label>
+        <input type="email" asp-for="Email" class="form-control" placeholder="name@domain.com" required autofocus>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label class="form-label" asp-for="Password">Password</label>
+        <div style="position:relative;">
+          <input type="password" asp-for="Password" class="form-control" placeholder="••••••••" required>
+          <button type="button" data-toggle-password="Password" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--mid);font-size:0.9rem;">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;font-size:0.85rem;">
+        <input type="checkbox" asp-for="RememberMe" style="accent-color:var(--taupe);width:16px;height:16px;">
+        <label asp-for="RememberMe">Remember me</label>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+    </form>
+
+    <div class="auth-links-row" style="margin-top:24px;">
+      <a href="#">Forgot Password?</a>
+      <span style="color:var(--mid)">New here? <a href="/Account/Register">Create Account</a></span>
+    </div>
+  </div>
+</div>
+
+@section ExtraJs {
+<script src="~/js/auth.js" asp-append-version="true"></script>
+}

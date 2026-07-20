@@ -1,0 +1,404 @@
+@{
+    ViewData["Title"] = "Checkout – NEHAS BEED";
+}
+
+@section ExtraCss {
+<style>
+  .checkout-layout { display:grid; grid-template-columns:1.6fr 1fr; gap:36px; padding:48px 0; align-items:start; }
+  .checkout-section { background:var(--white); border-radius:var(--r-lg); border:1px solid var(--border); padding:32px; margin-bottom:22px; box-shadow:var(--shadow-sm); transition:box-shadow 0.2s; }
+  .checkout-section:focus-within { box-shadow: 0 0 0 2px rgba(133,120,112,0.15), var(--shadow-sm); }
+  .checkout-section-title { font-family:var(--font-btn); font-size:0.75rem; font-weight:600; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:24px; display:flex; align-items:center; gap:14px; color:var(--ink); }
+  .checkout-section-title .step-num { background:var(--ink); color:var(--white); width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; flex-shrink:0; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .form-grid-full { grid-column:1 / -1; }
+
+  /* Delivery options */
+  .delivery-option { display:flex; align-items:center; gap:16px; padding:16px 20px; border:1.5px solid var(--border); border-radius:var(--r-md); cursor:pointer; transition:all 0.2s; margin-bottom:12px; }
+  .delivery-option:has(input:checked) { border-color:var(--taupe); background:rgba(133,120,112,0.04); }
+  .delivery-option-info { flex:1; }
+  .delivery-option-name { font-weight:500; font-size:0.9rem; }
+  .delivery-option-sub { font-size:0.76rem; color:var(--mid); margin-top:2px; }
+  .delivery-option-price { font-weight:600; font-size:0.9rem; }
+
+  /* Payment options */
+  .payment-options { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; }
+  .payment-option { border:1.5px solid var(--border); border-radius:var(--r-md); padding:20px 16px; text-align:center; cursor:pointer; transition:all 0.22s; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .payment-option:hover { border-color:rgba(133,120,112,0.5); background:rgba(133,120,112,0.02); }
+  .payment-option.active { border-color:var(--taupe); background:rgba(133,120,112,0.06); box-shadow:0 0 0 1px var(--taupe); }
+  .payment-option i { font-size:1.8rem; }
+  .payment-option .pay-label { font-family:var(--font-btn); font-size:0.74rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; }
+  .payment-option .pay-desc { font-size:0.72rem; color:var(--mid); line-height:1.4; }
+
+  /* Card fields */
+  #card-fields { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; padding:20px; background:#faf9f7; border-radius:var(--r-md); border:1px solid var(--border); }
+  #card-fields.hidden { display:none; }
+  #cash-note { display:none; margin-top:16px; padding:16px 20px; background:rgba(243,156,18,0.08); border:1px solid rgba(243,156,18,0.25); border-radius:var(--r-md); font-size:0.84rem; color:#b7860b; }
+  #cash-note.show { display:flex; align-items:flex-start; gap:10px; }
+
+  /* Order Summary */
+  .order-summary-panel { position:sticky; top:calc(var(--header-h) + 24px); }
+  .item-list-mini { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; max-height:280px; overflow-y:auto; padding-right:6px; }
+  .mini-item { display:flex; gap:14px; align-items:center; justify-content:space-between; }
+  .mini-item-img { width:48px; aspect-ratio:3/4; object-fit:cover; border-radius:var(--r-sm); border:1px solid var(--border); flex-shrink:0; }
+  .divider-line { height:1px; background:var(--border); margin:14px 0; }
+  .total-row { display:flex; justify-content:space-between; margin-bottom:9px; font-size:0.88rem; }
+  .total-row.grand { font-size:1.05rem; font-weight:600; border-top:1px solid var(--border); padding-top:14px; margin-top:6px; }
+
+  @@media(max-width:900px){ .checkout-layout{grid-template-columns:1fr;} .order-summary-panel{position:static;} .form-grid{grid-template-columns:1fr;} .payment-options{grid-template-columns:1fr 1fr;} }
+  @@media(max-width:480px){ .payment-options{grid-template-columns:1fr 1fr;} }
+</style>
+}
+
+<div class="container">
+  <div class="breadcrumb" style="padding:20px 0;">
+    <a href="/">Home</a><span>/</span>
+    <a href="/Home/Cart">Cart</a><span>/</span>
+    <span>Checkout</span>
+  </div>
+  <h1 class="section-title animate-fade-up" style="margin-bottom:32px;">Secure Checkout</h1>
+
+  <form id="checkout-form" method="post" action="/Home/PlaceOrder">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="paymentMethod" id="selected-payment-input" value="Cash on Delivery">
+
+    <div class="checkout-layout">
+      @* ──────────── LEFT COLUMN ──────────── *@
+      <div>
+
+        @* STEP 1: Personal Info *@
+        <div class="checkout-section">
+          <div class="checkout-section-title">
+            <span class="step-num">1</span> Personal Information
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">First Name *</label>
+              <input type="text" id="first-name" class="form-control" placeholder="e.g. Neha" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name *</label>
+              <input type="text" id="last-name" class="form-control" placeholder="e.g. Khalil" required>
+            </div>
+            <input type="hidden" name="customerName" id="customer-name-input">
+
+            <div class="form-group form-grid-full">
+              <label class="form-label">Email Address *</label>
+              <input type="email" name="customerEmail" class="form-control" placeholder="name@example.com" required>
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Phone Number *</label>
+              <input type="tel" name="customerPhone" class="form-control" placeholder="+92 300 0000000" required>
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Street Address *</label>
+              <input type="text" name="shippingAddress" class="form-control" placeholder="House / Street / Area" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">City *</label>
+              <input type="text" name="city" class="form-control" placeholder="Karachi" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Postcode</label>
+              <input type="text" name="postcode" class="form-control" placeholder="75500">
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Country *</label>
+              <select name="country" class="form-control" required>
+                <option>Pakistan</option>
+                <option>United Kingdom</option>
+                <option>United States</option>
+                <option>UAE</option>
+                <option>France</option>
+                <option>Germany</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        @* STEP 2: Delivery Method *@
+        <div class="checkout-section">
+          <div class="checkout-section-title">
+            <span class="step-num">2</span> Delivery Method
+          </div>
+          <label class="delivery-option">
+            <input type="radio" name="delivery" value="Standard" checked style="accent-color:var(--taupe);">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(133,120,112,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-box" style="color:var(--taupe);font-size:1rem;"></i>
+            </div>
+            <div class="delivery-option-info">
+              <div class="delivery-option-name">Standard Shipping</div>
+              <div class="delivery-option-sub">£8 · 5–7 business days &nbsp;|&nbsp; Free on orders over £150</div>
+            </div>
+            <span class="delivery-option-price" id="std-shipping-price">£8.00</span>
+          </label>
+          <label class="delivery-option">
+            <input type="radio" name="delivery" value="Express" style="accent-color:var(--taupe);">
+            <div style="width:38px;height:38px;border-radius:50%;background:rgba(133,120,112,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid fa-truck-fast" style="color:var(--taupe);font-size:1rem;"></i>
+            </div>
+            <div class="delivery-option-info">
+              <div class="delivery-option-name">Express Delivery</div>
+              <div class="delivery-option-sub">£15 · 1–2 business days · Priority handling</div>
+            </div>
+            <span class="delivery-option-price">£15.00</span>
+          </label>
+        </div>
+
+        @* STEP 3: Payment Method *@
+        <div class="checkout-section">
+          <div class="checkout-section-title">
+            <span class="step-num">3</span> Payment Method
+          </div>
+
+          <div class="payment-options">
+            @* Cash on Delivery *@
+            <div class="payment-option active" id="pay-cash" onclick="selectPayment('Cash on Delivery')">
+              <i class="fa-solid fa-money-bill-wave" style="color:#27ae60;"></i>
+              <div class="pay-label">Cash on Delivery</div>
+              <div class="pay-desc">Pay when your order arrives at your door</div>
+            </div>
+            @* Card *@
+            <div class="payment-option" id="pay-card" onclick="selectPayment('Card')">
+              <i class="fa-regular fa-credit-card" style="color:var(--taupe);"></i>
+              <div class="pay-label">Pay by Card</div>
+              <div class="pay-desc">Visa, Mastercard &amp; all major cards accepted</div>
+            </div>
+          </div>
+
+          @* Cash note *@
+          <div id="cash-note" class="show">
+            <i class="fa-solid fa-circle-info" style="margin-top:2px;font-size:1rem;"></i>
+            <div>Please keep the exact amount ready at the time of delivery. Our courier will collect payment on arrival.</div>
+          </div>
+
+          @* Card fields *@
+          <div id="card-fields" class="hidden">
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label">Card Number</label>
+              <input type="text" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNum(this)">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Expiry Date</label>
+              <input type="text" class="form-control" placeholder="MM / YY" maxlength="7">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVV</label>
+              <input type="password" class="form-control" placeholder="•••" maxlength="4">
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label">Name on Card</label>
+              <input type="text" class="form-control" placeholder="As printed on card">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      @* ──────────── RIGHT COLUMN: Order Summary ──────────── *@
+      <div class="order-summary-panel">
+        <div class="checkout-section">
+          <h3 style="font-family:var(--font-btn);font-size:0.72rem;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+            Order Summary
+          </h3>
+
+          <div class="item-list-mini" id="summary-items">
+            @* Populated by JS *@
+          </div>
+
+          <div class="divider-line"></div>
+          <div class="total-row"><span style="color:var(--mid);">Subtotal</span><span id="subtotal-val">£0.00</span></div>
+          <div class="total-row"><span style="color:var(--mid);">Shipping</span><span id="shipping-val">Free</span></div>
+          <div class="total-row grand"><span>Total</span><span id="total-val">£0.00</span></div>
+
+          <div id="hidden-cart-inputs-container"></div>
+
+          <button type="submit" class="btn btn-primary btn-full" style="margin-top:28px;padding:15px;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:10px;" onclick="preSubmitForm(event)">
+            <i class="fa-solid fa-lock" style="font-size:0.85rem;"></i> Place Order
+          </button>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:0.72rem;color:var(--mid);">
+            <i class="fa-solid fa-shield-halved" style="color:var(--success);"></i> Secure &amp; Encrypted Checkout
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<!-- Payment Processing Overlay -->
+<div id="payment-overlay" style="position: fixed; inset: 0; background: rgba(18, 16, 14, 0.88); backdrop-filter: blur(16px); z-index: 10000; display: none; align-items: center; justify-content: center; color: #fff; text-align: center; font-family: var(--font-body);">
+  <div style="max-width: 420px; width: 90%; padding: 40px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--r-lg); box-shadow: var(--shadow-lg);">
+    <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 28px;">
+      <div style="position: absolute; inset: 0; border: 4px solid rgba(201,169,110,0.15); border-radius: 50%;"></div>
+      <div style="position: absolute; inset: 0; border: 4px solid transparent; border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    </div>
+    
+    <div style="font-family: var(--font-heading); font-size: 1.6rem; font-style: italic; font-weight: 400; color: #fff; margin-bottom: 12px;" id="payment-status-title">Processing Payment</div>
+    <div style="font-size: 0.84rem; color: rgba(255,255,255,0.65); line-height: 1.6; min-height: 48px;" id="payment-status-desc">Connecting to secure card gateway...</div>
+    
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 32px; font-size: 0.68rem; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.15em;">
+      <i class="fa-solid fa-shield-halved" style="color: var(--success); font-size: 0.8rem;"></i> Secure Banking Encryption
+    </div>
+  </div>
+</div>
+
+<style>
+  @@keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
+@section ExtraJs {
+<script>
+  // ── Payment Toggle ──
+  function selectPayment(method) {
+    document.getElementById('selected-payment-input').value = method;
+    document.getElementById('pay-cash').classList.toggle('active', method === 'Cash on Delivery');
+    document.getElementById('pay-card').classList.toggle('active', method === 'Card');
+
+    const cardFields = document.getElementById('card-fields');
+    const cashNote   = document.getElementById('cash-note');
+
+    if (method === 'Card') {
+      cardFields.classList.remove('hidden');
+      cashNote.classList.remove('show');
+    } else {
+      cardFields.classList.add('hidden');
+      cashNote.classList.add('show');
+    }
+  }
+
+  // ── Card number formatter ──
+  function formatCardNum(input) {
+    let val = input.value.replace(/\D/g, '').substring(0, 16);
+    input.value = val.match(/.{1,4}/g)?.join(' ') || val;
+  }
+
+  // ── Pre-submit: build hidden inputs from localStorage ──
+  function preSubmitForm(e) {
+    e.preventDefault(); // Always prevent default first
+
+    const fn = document.getElementById('first-name').value.trim();
+    const ln = document.getElementById('last-name').value.trim();
+    if (!fn || !ln) { showToast('Please enter your full name.', 'error'); return; }
+    document.getElementById('customer-name-input').value = fn + ' ' + ln;
+
+    // Validate simple required fields on HTML form since we prevented default
+    const email = document.querySelector('input[name="customerEmail"]').value.trim();
+    const phone = document.querySelector('input[name="customerPhone"]').value.trim();
+    const addr  = document.querySelector('input[name="shippingAddress"]').value.trim();
+    const city  = document.querySelector('input[name="city"]').value.trim();
+    
+    if (!email || !phone || !addr || !city) {
+      showToast('Please fill out all required shipping and contact fields.', 'error');
+      return;
+    }
+
+    const items = getCart();
+    if (items.length === 0) {
+      showToast('Your cart is empty. Please add items first.', 'error');
+      return;
+    }
+
+    // Validate card fields if card payment selected
+    const payMethod = document.getElementById('selected-payment-input').value;
+    if (payMethod === 'Card') {
+      const cardNum = document.querySelector('#card-fields input[placeholder*="1234"]')?.value.replace(/\s/g,'') || '';
+      const expiry  = document.querySelector('#card-fields input[placeholder*="MM"]')?.value || '';
+      const cvv     = document.querySelector('#card-fields input[type="password"]')?.value || '';
+      if (cardNum.length < 16) { showToast('Please enter a valid 16-digit card number.', 'error'); return; }
+      if (!expiry || expiry.length < 5) { showToast('Please enter a valid expiry date (MM / YY).', 'error'); return; }
+      if (cvv.length < 3) { showToast('Please enter your CVV (3–4 digits).', 'error'); return; }
+    }
+
+    // Populate hidden inputs
+    const container = document.getElementById('hidden-cart-inputs-container');
+    container.innerHTML = '';
+    items.forEach((item, i) => {
+      container.innerHTML += `<input type="hidden" name="productIds[${i}]" value="${item.id}">`;
+      container.innerHTML += `<input type="hidden" name="quantities[${i}]" value="${item.qty}">`;
+      container.innerHTML += `<input type="hidden" name="colors[${i}]" value="${item.color}">`;
+    });
+
+    // Show Payment Processing Overlay
+    const overlay = document.getElementById('payment-overlay');
+    const titleEl = document.getElementById('payment-status-title');
+    const descEl  = document.getElementById('payment-status-desc');
+    const form    = document.getElementById('checkout-form');
+
+    overlay.style.display = 'flex';
+    
+    if (payMethod === 'Card') {
+      titleEl.textContent = "Processing Card Payment";
+      descEl.textContent = "Connecting to secure banking gateway...";
+      
+      setTimeout(() => {
+        descEl.textContent = "Verifying card credentials and 3D-Secure 2.0 authentication...";
+      }, 1500);
+
+      setTimeout(() => {
+        descEl.textContent = "Authorizing transaction amount and securing payment lock...";
+      }, 3000);
+
+      setTimeout(() => {
+        descEl.textContent = "Transaction authorized successfully! Booking order details...";
+      }, 4500);
+
+      setTimeout(() => {
+        form.submit();
+      }, 5500);
+    } else {
+      // Cash on Delivery
+      titleEl.textContent = "Booking Order";
+      descEl.textContent = "Verifying delivery details with courier API...";
+      
+      setTimeout(() => {
+        descEl.textContent = "Registering cash collection order details...";
+      }, 1200);
+
+      setTimeout(() => {
+        form.submit();
+      }, 2400);
+    }
+  }
+
+  // ── Populate order summary from localStorage ──
+  document.addEventListener('DOMContentLoaded', function () {
+    const items = getCart();
+    if (items.length === 0) {
+      showToast('Your cart is empty. Redirecting to shop...', 'info');
+      setTimeout(() => window.location.href = '/Home/Shop', 1500);
+      return;
+    }
+
+    const list = document.getElementById('summary-items');
+    let subtotal = 0;
+    items.forEach(item => {
+      const itemTotal = item.price * item.qty;
+      subtotal += itemTotal;
+      list.innerHTML += `
+        <div class="mini-item">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <img src="/${item.image}" alt="${item.name}" class="mini-item-img">
+            <div>
+              <div style="font-size:0.84rem;font-weight:500;line-height:1.3;">${item.name}</div>
+              <div style="font-size:0.72rem;color:var(--mid);margin-top:2px;">${item.color} × ${item.qty}</div>
+            </div>
+          </div>
+          <span style="font-size:0.88rem;font-weight:600;white-space:nowrap;">£${itemTotal.toFixed(2)}</span>
+        </div>`;
+    });
+
+    let shipping = subtotal >= 150 ? 0 : 8;
+    let total = subtotal + shipping;
+
+    document.getElementById('subtotal-val').textContent = `£${subtotal.toFixed(2)}`;
+    document.getElementById('shipping-val').textContent = shipping === 0 ? 'Free' : `£${shipping.toFixed(2)}`;
+    document.getElementById('total-val').textContent = `£${total.toFixed(2)}`;
+
+    // Update standard shipping display based on subtotal
+    const stdEl = document.getElementById('std-shipping-price');
+    if (stdEl) stdEl.textContent = shipping === 0 ? 'Free' : '£8.00';
+  });
+</script>
+}

@@ -1,0 +1,83 @@
+@* Newsletter *@
+<section class="newsletter-section">
+  <div class="container">
+    <p class="section-eyebrow">Stay Connected</p>
+    <h2 class="section-title" style="color:var(--white);margin-bottom:12px;">Join the NEHAS BEED Family</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:0.92rem;">Get 15% off your first order and early access to new collections.</p>
+    <form class="newsletter-form" id="newsletter-form">
+      <input type="email" placeholder="Your email address" class="newsletter-input" required>
+      <button type="submit" class="btn btn-gold">Subscribe</button>
+    </form>
+    <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-top:16px;">By subscribing, you agree to our Privacy Policy. Unsubscribe anytime.</p>
+  </div>
+</section>
+
+@* Footer *@
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="nav-logo" style="margin-bottom:16px;display:inline-flex;">
+          NEHAS BEED<span>Handcrafted Luxury</span>
+        </a>
+        <p>Wearable art made with love by skilled artisans. Each piece is unique, handcrafted with thousands of premium seed beads.</p>
+        <div class="footer-social">
+          <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="social-icon"><i class="fa-brands fa-pinterest"></i></a>
+          <a href="#" class="social-icon"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="#" class="social-icon"><i class="fa-brands fa-facebook"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Shop</h5>
+        <ul>
+          <li><a href="/Home/Shop">All Products</a></li>
+          <li><a href="/Home/Shop?cat=bags">Beaded Bags</a></li>
+          <li><a href="/Home/Shop?cat=chains">Chains</a></li>
+          <li><a href="/Home/Shop?cat=necklaces">Necklaces</a></li>
+          <li><a href="/Home/Shop?cat=accessories">Accessories</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Help</h5>
+        <ul>
+          <li><a href="#">Shipping &amp; Returns</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">Care Instructions</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">FAQs</a></li>
+        </ul>
+      </div>
+      <div class="footer-col footer-payments">
+        <h5>Secure Payments</h5>
+        <div class="payment-icons">
+          <span class="payment-icon">VISA</span>
+          <span class="payment-icon">MC</span>
+          <span class="payment-icon">AMEX</span>
+          <span class="payment-icon">PayPal</span>
+          <span class="payment-icon">Apple Pay</span>
+          <span class="payment-icon">Klarna</span>
+        </div>
+        <div style="margin-top:16px;">
+          <h5>Admin</h5>
+          <a href="/Admin/Dashboard" style="font-size:0.78rem;opacity:0.5;color:rgba(255,255,255,0.5);">Admin Panel →</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© @DateTime.Now.Year NEHAS BEED. All rights reserved.</span>
+      <span>Handcrafted with ♥ for every order</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const newsletterForm = document.getElementById('newsletter-form');
+  if (newsletterForm) {
+    newsletterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('✓ Subscribed! Thank you for joining our newsletter.');
+      this.reset();
+    });
+  }
+</script>
