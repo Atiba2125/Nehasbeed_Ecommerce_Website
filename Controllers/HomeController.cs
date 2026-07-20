@@ -60,12 +60,22 @@ namespace NehasBeed.Controllers
             return View();
         }
 
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {
             if (User.IsInRole("Admin"))
             {
                 TempData["AdminWarning"] = "Admins cannot buy products, add items to cart, or checkout.";
                 return RedirectToAction("Dashboard", "Admin");
+            }
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    ViewBag.UserEmail = user.Email;
+                    ViewBag.UserFullName = user.FullName;
+                }
             }
             return View();
         }
