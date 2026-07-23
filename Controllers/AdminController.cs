@@ -234,11 +234,11 @@ namespace NehasBeed.Controllers
                 var baseUrl = $"{Request.Scheme}://{Request.Host}";
                 if (status == "Confirmed")
                 {
-                    await _emailService.SendOrderConfirmedEmailAsync(order, baseUrl);
+                    _ = Task.Run(() => _emailService.SendOrderConfirmedEmailAsync(order, baseUrl));
                 }
                 else if (status == "Dispatched")
                 {
-                    await _emailService.SendOrderDispatchedEmailAsync(order);
+                    _ = Task.Run(() => _emailService.SendOrderDispatchedEmailAsync(order));
                 }
 
                 TempData["Success"] = $"Order {order.InvoiceNumber} marked as {status} and notification email generated.";

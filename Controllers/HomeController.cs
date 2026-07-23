@@ -3,7 +3,7 @@ using NehasBeed.Data;
 using NehasBeed.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-
+using Microsoft.AspNetCore.Authorization;
 namespace NehasBeed.Controllers
 {
     public class HomeController : Controller
@@ -50,6 +50,7 @@ namespace NehasBeed.Controllers
             return View(product);
         }
 
+        [Authorize]
         public IActionResult Cart()
         {
             if (User.IsInRole("Admin"))
@@ -60,6 +61,7 @@ namespace NehasBeed.Controllers
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult> Checkout()
         {
             if (User.IsInRole("Admin"))
@@ -191,7 +193,7 @@ namespace NehasBeed.Controllers
             await _db.SaveChangesAsync();
 
             // Send order placed email with PDF attachment
-            await _emailService.SendOrderPlacedEmailAsync(order);
+            _ = Task.Run(() => _emailService.SendOrderPlacedEmailAsync(order));
 
             TempData["OrderPlaced"]   = true;
             TempData["InvoiceNumber"] = invoiceNum;
@@ -225,11 +227,24 @@ namespace NehasBeed.Controllers
                 if (order.Status == "Cancelled")
                 {
                     ViewBag.ErrorTitle = "Already Cancelled";
-                    ViewBag.ErrorMessage = $"Order {order.InvoiceNumber} has already been cancelled.";
+                    ViewBag.ErrorMessage = $"Your order {order.InvoiceNumber} has already been cancelled.";
                     return View("CancelResult");
                 }
+                else if (order.Status == "Dispatched")
+                {
+                    ViewBag.ErrorTitle = "Order Already Dispatched";
+                    ViewBag.ErrorMessage = $"Great news! Your order {order.InvoiceNumber} has already been dispatched and is on its way to you. Therefore, it can no longer be cancelled.";
+                    return View("CancelResult");
+                }
+                else if (order.Status == "Delivered")
+                {
+                    ViewBag.ErrorTitle = "Order Already Delivered";
+                    ViewBag.ErrorMessage = $"Your order {order.InvoiceNumber} has already been delivered and cannot be cancelled. If you need assistance with returns, please review our return policy.";
+                    return View("CancelResult");
+                }
+                
                 ViewBag.ErrorTitle = "Cancellation Not Allowed";
-                ViewBag.ErrorMessage = $"Order {order.InvoiceNumber} cannot be cancelled because its current status is '{order.Status}'.";
+                ViewBag.ErrorMessage = $"Your order {order.InvoiceNumber} cannot be cancelled at this stage (Current Status: {order.Status}).";
                 return View("CancelResult");
             }
 

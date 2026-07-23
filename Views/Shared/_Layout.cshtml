@@ -81,6 +81,7 @@
 
     // Client-side Cart operations
     function getCart() {
+      if (!IS_AUTHENTICATED) return [];
       try {
         return JSON.parse(localStorage.getItem('cart') || '[]');
       } catch (e) {
